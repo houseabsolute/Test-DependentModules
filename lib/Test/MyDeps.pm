@@ -333,6 +333,22 @@ prefer to hard code a list of modules to test.
 
 In this case, you will have to handle your own test planning.
 
+=head1 WARNINGS, LOGGING AND VERBOSITY
+
+By default, this module attempts to quiet down CPAN and the module building
+toolchain as much as possible. However, when there are test failures in a
+dependency it's nice to see the output.
+
+In addition, if the tests spit out warnings but still pass, this will just be
+treated as a pass.
+
+This module can log all successes, warnings, failures, along with the full
+output of the test suite for each dependency. To enable this, simply set
+$ENV{PERL_TEST_MD_LOG} to the path of the log file.
+
+You also can enable CPAN's output by setting the
+C<$ENV{TEST_PERL_MD_CPAN_VERBOSE}> variable to a true value.
+
 =head1 BUGS
 
 Please report any bugs or feature requests to C<bug-test-mydeps@rt.cpan.org>,
