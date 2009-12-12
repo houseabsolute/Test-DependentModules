@@ -6,4 +6,3 @@ use Test::More tests => 2;
 
 test_distro( 'Exception::Class' );
 test_distro( 'CPAN::Test::Dummy::Perl5::Build::Fails' );
-

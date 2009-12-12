@@ -21,18 +21,27 @@ use Test::More;
 
 our @EXPORT_OK = qw( test_all_my_deps test_distro );
 
-#$CPAN::Be_Silent = 1;
-
 # By default, when CPAN is told to be silent, it sends output to a log
 # file. We don't want that to happen.
+BEGIN
 {
+    $CPAN::Be_Silent = 1;
+
     package CPAN::Shell;
+
+    use IO::Handle::Util qw( io_from_write_cb );
 
     no warnings 'redefine';
 
-    open my $fh, '>', File::Spec->devnull();
+    my $fh;
+    if ( $ENV{TEST_PERL_MD_CPAN_VERBOSE} ) {
+        $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
+    }
+    else {
+        open $fh, '>', File::Spec->devnull();
+    }
 
-    sub report_fh { $fh }
+    sub report_fh {$fh}
 }
 
 CPAN::HandleConfig->load();
@@ -42,11 +51,21 @@ CPAN::Index->reload();
 $CPAN::Config->{test_report} = 0;
 $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
 $CPAN::Config->{prerequisites_policy} = 'follow';
-$CPAN::Config->{make_install_make_command} =~ s/^sudo //;
+$CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
 $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
+$CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
+$CPAN::Config->{mbuild_install_arg} =~s /--uninst\s+1//;
+
+$ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
+    File::Spec->catdir( _temp_lib_dir(), 'lib', 'perl5' );
+$ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
+$ENV{PERL_MM_USE_DEFAULT} = 1;
 
 sub test_all_my_deps {
-    my @deps = _get_deps();
+    my $module = shift;
+    my $params = shift;
+
+    my @deps = _get_deps( $module, $params );
 
     plan tests => scalar @deps;
 
@@ -54,22 +73,43 @@ sub test_all_my_deps {
 }
 
 sub _get_deps {
-    
+    my $module = shift;
+    my $params = shift;
+
+    $module =~ s/::/-/g;
+
+    my $distro = CPANDB->distribution($module);
+
+    my @deps = CPANDB::Dependency->select(
+        'where dependency = ? and ( core is null or core >= ? )',
+        $module, $]
+    );
+
+    my $allow
+        = $params->{exclude}
+        ? sub { $_[0] !~ /$params->{exclude}/ }
+        : sub {1};
+
+    return map { $_->distribution() }
+        grep   { $_ !~ /^(?:Task|Bundle)/ }
+        grep   { $allow->($_) } @deps;
 }
 
 sub test_distro {
-    my $module_name = shift;
+    my $name = shift;
 
     my $log = _get_log();
 
-    my $dist = _get_distro_for_module($module_name);
+    $name =~ s/-/::/g;
+
+    my $dist = _get_distro($name);
 
     unless ($dist) {
-        print {$log} "UNKNOWN : $module_name (not on CPAN?)\n";
+        print {$log} "UNKNOWN : $name (not on CPAN?)\n";
 
     SKIP:
         {
-            skip "Could not find $module_name on CPAN", 1;
+            skip "Could not find $name on CPAN", 1;
         }
 
         return;
@@ -81,18 +121,18 @@ sub test_distro {
 
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
 
-    my $summary = "$status: $module_name - " . $dist->base_id();
+    my $summary = "$status: $name - " . $dist->base_id();
 
     print {$log} "$summary\n";
 
-    ok( $passed, "$module_name passed all tests" );
+    ok( $passed, "$name passed all tests" );
 
     return if $passed && !$stderr;
 
     print {$log} "\n\n";
     print {$log} q{-} x 50;
     print {$log} "\n";
-    print {$log} "$module_name\n\n";
+    print {$log} "$name\n\n";
     print {$log} "$output\n\n";
 }
 
@@ -102,7 +142,7 @@ sub test_distro {
     sub _get_log {
         return $Log if defined $Log;
 
-        my $log_file = $ENV{PERL_TEST_AMD_LOG} || File::Spec->devnull();
+        my $log_file = $ENV{PERL_TEST_MD_LOG} || File::Spec->devnull();
 
         open $Log, '>', $log_file;
 
@@ -110,12 +150,12 @@ sub test_distro {
     }
 }
 
-sub _get_distro_for_module {
-    my $module_name = shift;
+sub _get_distro {
+    my $name = shift;
 
-    my @mods = CPAN::Shell->expand( 'Module', $module_name );
+    my @mods = CPAN::Shell->expand( 'Module', $name );
 
-    die "Cannot resolve $module_name to a single module object"
+    die "Cannot resolve $name to a single CPAN module"
         if @mods > 1;
 
     return unless @mods;
@@ -129,7 +169,6 @@ sub _get_distro_for_module {
 
 sub _install_prereqs {
     my $dist = shift;
-
 
     $dist->make();
 
@@ -147,7 +186,9 @@ sub _install_prereqs {
 
         }
         else {
-            my $dist = _get_distro_for_module( $prereq->[0] );
+            my $dist = _get_distro( $prereq->[0] );
+            _install_prereqs($dist);
+            $dist->notest();
             $dist->install();
         }
     }
@@ -165,11 +206,6 @@ sub _run_tests_for_dir {
     my $dir = shift;
 
     local $CWD = $dir;
-
-    local $ENV{PERL_AUTOINSTALL} = '--defaultdeps';
-    local $ENV{PERL_MM_USE_DEFAULT} = 1;
-    local $ENV{PERL5LIB} = join q{:}, $ENV{PERL5LIB},
-        File::Spec->catdir( _temp_lib_dir(), 'lib', 'perl5' );
 
     if ( -f "Build.PL" ) {
         return
@@ -201,13 +237,13 @@ sub _run_commands {
 
 sub _run_tests {
     my $output = q{};
-    my $error = q{};
+    my $error  = q{};
 
     my $stderr = sub {
         my $line = shift;
 
         $output .= $line;
-        $error .= $line;
+        $error  .= $line;
     };
 
     if ( -f 'Build.PL' ) {
