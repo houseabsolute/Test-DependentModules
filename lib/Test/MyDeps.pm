@@ -288,8 +288,8 @@ Test::MyDeps - Test all modules which depend on your module
 
 =head1 DESCRIPTION
 
-B<WARNING>: The tests this module does should B<never> be done as part of a
-normal CPAN install. It's much too fragile!
+B<WARNING>: The tests this module does should B<never> be included as part of
+a normal CPAN install!
 
 This module is intended as a tool for module authors who would like to easily
 test that a module release will not break dependencies. This is particularly
@@ -309,7 +309,7 @@ C<$ENV{PERL_MM_USE_DEFAULT}> to a true value.
 
 Nonetheless, some ill-behaved modules will I<still> wait for a
 prompt. Unfortunately, because of the way this module attempts to keep output
-to a minimum, you won't see these. Sorry.
+to a minimum, you won't see these prompts. Patches are welcome.
 
 =head1 FUNCTIONS
 
@@ -323,7 +323,7 @@ and test them. It will call the C<plan()> function from L<Test::More> for you.
 If you want to exclude some dependencies, you can pass a regex which will be
 used to exclude any matching distributions.
 
-Additionally, any distribution name starting with "Task" or "Bundle" is
+Additionally, any distribution name starting with "Task" or "Bundle" is always
 excluded.
 
 =head2 test_module($name)
