@@ -95,7 +95,7 @@ sub _get_deps {
 
     return map { $_->distribution() }
         grep   { $_ !~ /^(?:Task|Bundle)/ }
-        grep   { $allow->($_) } @deps;
+        grep   { $allow->( $_->distribution() ) } @deps;
 }
 
 sub test_module {
@@ -321,7 +321,9 @@ Given a module name, this function uses C<CPANDB> to find all its dependencies
 and test them. It will call the C<plan()> function from L<Test::More> for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be
-used to exclude any matching distributions.
+used to exclude any matching distributions. Note that this will be tested
+against the I<distribution name>, which will be something like "Test-MyDeps"
+(note the lack of colons).
 
 Additionally, any distribution name starting with "Task" or "Bundle" is always
 excluded.
