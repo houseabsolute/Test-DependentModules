@@ -1,3 +1,8 @@
+0.03   2009-12-12
+
+- Added missing prereq on IO::Handle::Util
+
+
 0.02   2009-12-12
 
 - Fixed test_all_my_deps so the exclude parameter actually works.
