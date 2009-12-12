@@ -333,6 +333,13 @@ prefer to hard code a list of modules to test.
 
 In this case, you will have to handle your own test planning.
 
+=head1 PERL5LIB FOR DEPENDENCIES
+
+If you want to include a module-to-be-released in the path seen by
+dependencies, you must make sure that the correct path ends up in
+C<$ENV{PERL5LIB}>. If you use C<prove -l> or C<prove -b> to run tests, then
+that will happen automatically.
+
 =head1 WARNINGS, LOGGING AND VERBOSITY
 
 By default, this module attempts to quiet down CPAN and the module building
