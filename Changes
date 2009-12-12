@@ -1,3 +1,13 @@
-0.01   Date/time
+0.02   2009-12-12
+
+- Fixed test_all_my_deps so the exclude parameter actually works.
+
+- The PERL5LIB var did not include the temp dir containing temporarily
+  installed second+ level depenencies.
+
+- Renamed the TEST_PERL_MD_CPAN_VERBOSE env var to PERL_TEST_MD_CPAN_VERBOSE.
+
+
+0.01   2009-12-12
 
 - First version, released on an unsuspecting world.
