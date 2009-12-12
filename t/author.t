@@ -1,8 +1,8 @@
-use strict;
-use warnings;
+ use strict;
+ use warnings;
 
-use Test::MyDeps qw( test_distro );
-use Test::More tests => 2;
+ use Test::MyDeps qw( test_module );
+ use Test::More tests => 2;
 
-test_distro( 'Exception::Class' );
-test_distro( 'CPAN::Test::Dummy::Perl5::Build::Fails' );
+ test_module( 'Exception::Class' );
+ test_module( 'CPAN::Test::Dummy::Perl5::Build::Fails' );
