@@ -3,6 +3,8 @@ package Test::MyDeps;
 use strict;
 use warnings;
 
+our $VERSION = '0.01';
+
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }

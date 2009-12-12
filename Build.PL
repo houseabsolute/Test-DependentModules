@@ -18,6 +18,9 @@ my $build = Module::Build->new(
         'IPC::Run3'   => '0',
         'Test::More'  => '0',
     },
+    build_requires => {
+        'Test::More' => '0',
+    },
     create_readme      => 1,
     sign               => 1,
     create_makefile_pl => 'traditional',
