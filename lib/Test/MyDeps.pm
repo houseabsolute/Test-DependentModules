@@ -19,7 +19,7 @@ use File::Temp qw( tempdir );
 use IPC::Run3 qw( run3 );
 use Test::More;
 
-our @EXPORT_OK = qw( test_all_my_deps test_distro );
+our @EXPORT_OK = qw( test_all_my_deps test_module );
 
 # By default, when CPAN is told to be silent, it sends output to a log
 # file. We don't want that to happen.
@@ -27,7 +27,8 @@ BEGIN
 {
     $CPAN::Be_Silent = 1;
 
-    package CPAN::Shell;
+    package
+        CPAN::Shell;
 
     use IO::Handle::Util qw( io_from_write_cb );
 
@@ -69,7 +70,7 @@ sub test_all_my_deps {
 
     plan tests => scalar @deps;
 
-    test_distro($_) for @deps;
+    test_module($_) for @deps;
 }
 
 sub _get_deps {
@@ -95,7 +96,7 @@ sub _get_deps {
         grep   { $allow->($_) } @deps;
 }
 
-sub test_distro {
+sub test_module {
     my $name = shift;
 
     my $log = _get_log();
@@ -261,3 +262,71 @@ sub _run_tests {
 1;
 
 # ABSTRACT: Test all modules which depend on your module
+
+__END__
+
+=pod
+
+=head1 SYNOPSIS
+
+  use Test::MyDeps qw( test_all_my_deps );
+
+  test_all_my_deps('My::Module');
+
+  # or ...
+
+  use Test::MyDeps qw( test_module );
+  use Test::More tests => 3;
+
+  test_module('Exception::Class');
+  test_module('DateTime');
+  test_module('Log::Dispatch');
+
+=head1 DESCRIPTION
+
+B<WARNING>: The tests this module does should B<never> be done as part of a
+normal CPAN install. It's much too fragile!
+
+This module is intended as a tool for module authors who would like to easily
+test that a module release will not break dependencies. This is particularly
+useful for module authors (like myself) who have modules which are a
+dependency of many other modules.
+
+=head2 How It Works
+
+Internally, this module will download dependencies from CPAN and run their
+tests. If those dependencies in turn have unsatisfied dependencies, they are
+installed into a temporary directory. These second-level (and third-, etc)
+dependencies are I<not> tested.
+
+In order to avoid prompting, this module attempts set
+C<$ENV{PERL_AUTOINSTALL}> to C<--defaultdeps> and sets
+C<$ENV{PERL_MM_USE_DEFAULT}> to a true value.
+
+Nonetheless, some ill-behaved modules will I<still> wait for a
+prompt. Unfortunately, because of the way this module attempts to keep output
+to a minimum, you won't see these. Sorry.
+
+=head1 FUNCTIONS
+
+This module optionally exports two functions:
+
+=head2 test_all_my_deps( $module, { exclude => qr/.../ } )
+
+Given a module name, this function uses C<CPANDB> to find all its dependencies
+and test them. It will call the C<plan()> function from L<Test::More> for you.
+
+If you want to exclude some dependencies, you can pass a regex which will be
+used to exclude any matching distributions.
+
+Additionally, any distribution name starting with "Task" or "Bundle" is
+excluded.
+
+=head2 test_module($name)
+
+Given a module name, this function will test it. You can use this if you'd
+prefer to hard code a list of modules to test.
+
+In this case, you will have to handle your own test planning.
+
+=cut
