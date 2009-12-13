@@ -101,14 +101,12 @@ sub _get_deps {
 sub test_module {
     my $name = shift;
 
-    my $log = _get_log();
-
     $name =~ s/-/::/g;
 
     my $dist = _get_distro($name);
 
     unless ($dist) {
-        print {$log} "UNKNOWN : $name (not on CPAN?)\n";
+        print { _status_log() } "UNKNOWN : $name (not on CPAN?)\n";
 
     SKIP:
         {
@@ -126,31 +124,73 @@ sub test_module {
 
     my $summary = "$status: $name - " . $dist->base_id();
 
-    print {$log} "$summary\n";
+    print { _status_log() } "$summary\n";
+    print { _error_log() } "$summary\n";
 
     ok( $passed, "$name passed all tests" );
 
-    return if $passed && !$stderr;
-
-    print {$log} "\n\n";
-    print {$log} q{-} x 50;
-    print {$log} "\n";
-    print {$log} "$name\n\n";
-    print {$log} "$output\n\n";
+    if ( $passed && !$stderr ) {
+        print { _error_log() } "\n";
+    }
+    else {
+        print { _error_log() } q{-} x 50;
+        print { _error_log() } "\n";
+        print { _error_log() } "$output\n";
+    }
 }
 
 {
-    my $Log;
+    my $fh;
 
-    sub _get_log {
-        return $Log if defined $Log;
+    sub _status_log {
+        return $fh if defined $fh;
 
-        my $log_file = $ENV{PERL_TEST_MD_LOG} || File::Spec->devnull();
+        my $log_file = _log_filename('status');
 
-        open $Log, '>', $log_file;
+        open $fh, '>', $log_file;
 
-        return $Log;
+        return $fh;
     }
+}
+
+{
+    my $fh;
+
+    sub _error_log {
+        return $fh if defined $fh;
+
+        my $log_file = _log_filename('error');
+
+        open $fh, '>', $log_file;
+
+        return $fh;
+    }
+}
+
+{
+    my $fh;
+
+    sub _prereq_log {
+        return $fh if defined $fh;
+
+        my $log_file = _log_filename('prereq');
+
+        open $fh, '>', $log_file;
+
+        return $fh;
+    }
+}
+
+sub _log_filename {
+    my $type = shift;
+
+    return File::Spec->devnull()
+        unless $ENV{PERL_TEST_MD_LOG_DIR};
+
+    return File::Spec->catfile(
+        $ENV{PERL_TEST_MD_LOG_DIR},
+        'test-mydeps-' . $$ . q{-} . $type . '.log'
+    );
 }
 
 sub _get_distro {
@@ -181,6 +221,8 @@ sub _install_prereqs {
     local $CPAN::Config->{mbuild_install_arg}
         .= " --install_base $install_dir";
 
+    my $for_dist = $dist->base_id();
+
     for my $prereq (
         $dist->unsat_prereq('configure_requires_later'),
         $dist->unsat_prereq('later')
@@ -191,6 +233,11 @@ sub _install_prereqs {
         else {
             my $dist = _get_distro( $prereq->[0] );
             _install_prereqs($dist);
+
+            my $installing = $dist->base_id();
+
+            print { _prereq_log() } "Installing $installing for $for_dist\n";
+
             $dist->notest();
             $dist->install();
         }
@@ -356,9 +403,17 @@ dependency it's nice to see the output.
 In addition, if the tests spit out warnings but still pass, this will just be
 treated as a pass.
 
-This module can log all successes, warnings, failures, along with the full
-output of the test suite for each dependency. To enable this, simply set
-$ENV{PERL_TEST_MD_LOG} to the path of the log file.
+If you enable logging, this module log all successes, warnings, and failures,
+along with the full output of the test suite for each dependency. In addition,
+it logs what prereqs it installs, since you may want to install some of them
+permanently to speed up future tests.
+
+To enable logging, you must provide a directory to which log files will be
+written. The log file names are of the form C<test-my-deps-$$-$type.log>,
+where C<$type> is one of "status", "error", or "prereq".
+
+The directory should be provided in C<$ENV{PERL_TEST_MD_LOG_DIR}>. The
+directory must already exist.
 
 You also can enable CPAN's output by setting the
 C<$ENV{PERL_TEST_MD_CPAN_VERBOSE}> variable to a true value.

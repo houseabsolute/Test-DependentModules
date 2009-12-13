@@ -1,3 +1,11 @@
+0.04   2009-12-12
+
+- In some weird inexplicable case, testing a module seemed to somehow trigger
+  File::Temp's cleanup routine too early, deleting the temp dir containing
+  temporary prereq installations. Test::MyDeps now manages its temp dir
+  manually.
+
+
 0.03   2009-12-12
 
 - Added missing prereq on IO::Handle::Util
