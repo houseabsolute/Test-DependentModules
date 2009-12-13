@@ -3,7 +3,7 @@ package Test::DependentModules;
 use strict;
 use warnings;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
