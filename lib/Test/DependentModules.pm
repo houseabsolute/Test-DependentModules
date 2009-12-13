@@ -22,7 +22,7 @@ use File::Temp qw( tempdir );
 use IPC::Run3 qw( run3 );
 use Test::More;
 
-our @EXPORT_OK = qw( test_all_my_deps test_module );
+our @EXPORT_OK = qw( test_all_dependents test_module );
 
 # By default, when CPAN is told to be silent, it sends output to a log
 # file. We don't want that to happen.
@@ -65,7 +65,7 @@ $ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
 $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
 $ENV{PERL_MM_USE_DEFAULT} = 1;
 
-sub test_all_my_deps {
+sub test_all_dependents {
     my $module = shift;
     my $params = shift;
 
@@ -324,9 +324,9 @@ Test::DependentModules - Test all modules which depend on your module
 
 =head1 SYNOPSIS
 
-  use Test::DependentModules qw( test_all_my_deps );
+  use Test::DependentModules qw( test_all_dependents );
 
-  test_all_my_deps('My::Module');
+  test_all_dependents('My::Module');
 
   # or ...
 
@@ -366,7 +366,7 @@ to a minimum, you won't see these prompts. Patches are welcome.
 
 This module optionally exports two functions:
 
-=head2 test_all_my_deps( $module, { exclude => qr/.../ } )
+=head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
 Given a module name, this function uses C<CPANDB> to find all its dependencies
 and test them. It will call the C<plan()> function from L<Test::More> for you.

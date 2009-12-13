@@ -1,3 +1,8 @@
+0.05   2009-12-12
+
+- Renamed the test_all_my_deps function to test_all_dependents.
+
+
 0.04   2009-12-12
 
 - Renamed to Test::DependentModules, since as Jesse Luehrs pointed out, we're
