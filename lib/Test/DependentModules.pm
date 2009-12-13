@@ -38,7 +38,7 @@ BEGIN
     no warnings 'redefine';
 
     my $fh;
-    if ( $ENV{PERL_TEST_MD_CPAN_VERBOSE} ) {
+    if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
         $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
     }
     else {
@@ -186,10 +186,10 @@ sub _log_filename {
     my $type = shift;
 
     return File::Spec->devnull()
-        unless $ENV{PERL_TEST_MD_LOG_DIR};
+        unless $ENV{PERL_TEST_DM_LOG_DIR};
 
     return File::Spec->catfile(
-        $ENV{PERL_TEST_MD_LOG_DIR},
+        $ENV{PERL_TEST_DM_LOG_DIR},
         'test-mydeps-' . $$ . q{-} . $type . '.log'
     );
 }
@@ -411,11 +411,11 @@ To enable logging, you must provide a directory to which log files will be
 written. The log file names are of the form C<test-my-deps-$$-$type.log>,
 where C<$type> is one of "status", "error", or "prereq".
 
-The directory should be provided in C<$ENV{PERL_TEST_MD_LOG_DIR}>. The
+The directory should be provided in C<$ENV{PERL_TEST_DM_LOG_DIR}>. The
 directory must already exist.
 
 You also can enable CPAN's output by setting the
-C<$ENV{PERL_TEST_MD_CPAN_VERBOSE}> variable to a true value.
+C<$ENV{PERL_TEST_DM_CPAN_VERBOSE}> variable to a true value.
 
 =head1 BUGS
 
