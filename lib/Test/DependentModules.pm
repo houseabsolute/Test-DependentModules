@@ -1,4 +1,4 @@
-package Test::MyDeps;
+package Test::DependentModules;
 
 use strict;
 use warnings;
@@ -320,17 +320,17 @@ __END__
 
 =head1 NAME
 
-Test::MyDeps - Test all modules which depend on your module
+Test::DependentModules - Test all modules which depend on your module
 
 =head1 SYNOPSIS
 
-  use Test::MyDeps qw( test_all_my_deps );
+  use Test::DependentModules qw( test_all_my_deps );
 
   test_all_my_deps('My::Module');
 
   # or ...
 
-  use Test::MyDeps qw( test_module );
+  use Test::DependentModules qw( test_module );
   use Test::More tests => 3;
 
   test_module('Exception::Class');
@@ -373,7 +373,7 @@ and test them. It will call the C<plan()> function from L<Test::More> for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be
 used to exclude any matching distributions. Note that this will be tested
-against the I<distribution name>, which will be something like "Test-MyDeps"
+against the I<distribution name>, which will be something like "Test-DependentModules"
 (note the lack of colons).
 
 Additionally, any distribution name starting with "Task" or "Bundle" is always

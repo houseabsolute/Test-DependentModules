@@ -1,9 +1,15 @@
 0.04   2009-12-12
 
+- Renamed to Test::DependentModules, since as Jesse Luehrs pointed out, we're
+  not testing our dependencies, we're testing things that depend on us.
+
 - In some weird inexplicable case, testing a module seemed to somehow trigger
   File::Temp's cleanup routine too early, deleting the temp dir containing
   temporary prereq installations. Test::MyDeps now manages its temp dir
   manually.
+
+- Changed how logging works. There are now three log files created, and you
+  specify a log _directory_, not a file, via the
 
 
 0.03   2009-12-12
