@@ -199,11 +199,13 @@ sub _install_prereqs {
 
 {
     my $Dir;
-    BEGIN { $Dir = tempdir( CLEANUP => 1 ); }
+    BEGIN { $Dir = tempdir( CLEANUP => 0 ); }
 
     sub _temp_lib_dir {
         return $Dir;
     }
+
+    END { unlink $Dir }
 }
 
 sub _run_tests_for_dir {
