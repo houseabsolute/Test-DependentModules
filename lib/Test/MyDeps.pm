@@ -3,7 +3,7 @@ package Test::MyDeps;
 use strict;
 use warnings;
 
-our $VERSION = '0.03';
+our $VERSION = '0.04';
 
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
@@ -291,8 +291,6 @@ sub _run_commands {
 sub _run_tests {
     my $output = q{};
     my $error  = q{};
-
-    diag( "PERL5LIB is $ENV{PERL5LIB}" );
 
     my $stderr = sub {
         my $line = shift;
