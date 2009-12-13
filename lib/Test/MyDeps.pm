@@ -16,6 +16,7 @@ use CPANDB;
 use Cwd qw( abs_path );
 use Exporter qw( import );
 use File::chdir;
+use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
 use IPC::Run3 qw( run3 );
@@ -252,7 +253,7 @@ sub _install_prereqs {
         return $Dir;
     }
 
-    END { unlink $Dir }
+    END { rmtree($Dir) }
 }
 
 sub _run_tests_for_dir {
