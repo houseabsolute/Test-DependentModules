@@ -3,8 +3,6 @@ package Test::DependentModules;
 use strict;
 use warnings;
 
-our $VERSION = '0.05';
-
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
@@ -321,13 +319,11 @@ sub _run_tests {
 
 1;
 
+# ABSTRACT: Test all modules which depend on your module
+
 __END__
 
 =pod
-
-=head1 NAME
-
-Test::DependentModules - Test all modules which depend on your module
 
 =head1 SYNOPSIS
 
@@ -447,16 +443,5 @@ on free software full time, which seems unlikely at best.
 
 To donate, log into PayPal and send money to autarch@urth.org or use the
 button on this page: L<http://www.urth.org/~autarch/fs-donation.html>
-
-=head1 AUTHOR
-
-Dave Rolsky, E<lt>autarch@urth.orgE<gt>
-
-=head1 COPYRIGHT & LICENSE
-
-Copyright 2009 Dave Rolsky, All Rights Reserved.
-
-This program is free software; you can redistribute it and/or modify it under
-the same terms as Perl itself.
 
 =cut
