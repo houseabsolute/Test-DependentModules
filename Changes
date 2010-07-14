@@ -1,3 +1,12 @@
+0.06   2010-07-14
+
+- Ignore cargo-culted diag() output that's present in many modules, looking
+  like this:
+
+    # Testing Foo::Bar 0.01, Perl 5.00801, /usr/bin/perl
+
+  This was being treated as a warning, but it can safely be ignored.
+
 0.05   2009-12-12
 
 - Renamed the test_all_my_deps function to test_all_dependents.
