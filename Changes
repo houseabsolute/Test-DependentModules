@@ -1,3 +1,8 @@
+0.07   2010-07-15
+
+- Include author id in status line.
+
+
 0.06   2010-07-14
 
 - Ignore cargo-culted diag() output that's present in many modules, looking
