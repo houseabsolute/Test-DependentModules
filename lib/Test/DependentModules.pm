@@ -128,7 +128,7 @@ sub test_module {
 
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
 
-    my $summary = "$status: $name - " . $dist->base_id();
+    my $summary = "$status: $name - " . $dist->base_id() . ' - ' . $dist->author()->id();
 
     print { _status_log() } "$summary\n";
     print { _error_log() } "$summary\n";
