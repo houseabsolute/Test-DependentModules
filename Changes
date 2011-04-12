@@ -1,3 +1,17 @@
+0.08   2011-04-12
+
+- This module can now run tests in parallel if you have Parallel::ForkManager
+  installed. See the docs for details.
+
+- The test_module() sub has been deprecated in favor a new sub,
+  test_modules(). If you use test_module(), you can't ever run tests in
+  parallel.
+
+- We now defer loading CPAN.pm and related modules until tests are
+  running. This avoids the possibility of CPAN prompting for config if
+  Test::DependentModules is loaded but not actually used.
+
+
 0.07   2010-07-15
 
 - Include author id in status line.
