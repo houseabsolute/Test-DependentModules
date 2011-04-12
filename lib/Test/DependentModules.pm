@@ -8,8 +8,6 @@ use warnings;
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
 
 use autodie;
-use CPAN;
-use CPAN::Shell;
 use CPANDB;
 use Cwd qw( abs_path );
 use Exporter qw( import );
@@ -22,42 +20,6 @@ use Test::More;
 
 our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
 
-# By default, when CPAN is told to be silent, it sends output to a log
-# file. We don't want that to happen.
-BEGIN
-{
-    $CPAN::Be_Silent = 1;
-
-    package
-        CPAN::Shell;
-
-    use IO::Handle::Util qw( io_from_write_cb );
-
-    no warnings 'redefine';
-
-    my $fh;
-    if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
-        $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
-    }
-    else {
-        open $fh, '>', File::Spec->devnull();
-    }
-
-    sub report_fh {$fh}
-}
-
-CPAN::HandleConfig->load();
-CPAN::Shell::setup_output();
-CPAN::Index->reload();
-
-$CPAN::Config->{test_report} = 0;
-$CPAN::Config->{mbuildpl_arg} .= ' --quiet';
-$CPAN::Config->{prerequisites_policy} = 'follow';
-$CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
-$CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
-$CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
-$CPAN::Config->{mbuild_install_arg} =~s /--uninst\s+1//;
-
 $ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
     File::Spec->catdir( _temp_lib_dir(), 'lib', 'perl5' );
 $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
@@ -66,6 +28,8 @@ $ENV{PERL_MM_USE_DEFAULT} = 1;
 sub test_all_dependents {
     my $module = shift;
     my $params = shift;
+
+    _load_cpan();
 
     my @deps = _get_deps( $module, $params );
 
@@ -98,6 +62,8 @@ sub _get_deps {
 }
 
 sub test_modules {
+    _load_cpan();
+
     if (   $ENV{PERL_TEST_DM_PROCESSES}
         && $ENV{PERL_TEST_DM_PROCESSES} > 1
         && eval { require Parallel::ForkManager } ) {
@@ -134,6 +100,8 @@ sub test_modules {
 sub test_module {
     my $name = shift;
     my $pm   = shift;
+
+    _load_cpan();
 
     $name =~ s/-/::/g;
 
@@ -373,6 +341,64 @@ sub _run_tests {
     my $passed = $output =~ /Result: PASS/;
 
     return ( $passed, $output, $error );
+}
+
+{
+    my $LOADED_CPAN = 0;
+
+    # By default, when CPAN is told to be silent, it sends output to a log
+    # file. We don't want that to happen.
+    my $monkey_patch = <<'EOF';
+{
+    package
+        CPAN::Shell;
+
+    use IO::Handle::Util qw( io_from_write_cb );
+
+    no warnings 'redefine';
+
+    my $fh;
+    if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
+        $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
+    }
+    else {
+        open $fh, '>', File::Spec->devnull();
+    }
+
+    sub report_fh {$fh}
+}
+EOF
+
+    sub _load_cpan {
+        return if $LOADED_CPAN;
+
+        require CPAN;
+        require CPAN::Shell;
+
+        {
+            local $@;
+            eval $monkey_patch;
+            die $@ if $@;
+        }
+
+        $CPAN::Be_Silent = 1;
+
+        CPAN::HandleConfig->load();
+        CPAN::Shell::setup_output();
+        CPAN::Index->reload();
+
+        $CPAN::Config->{test_report} = 0;
+        $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
+        $CPAN::Config->{prerequisites_policy} = 'follow';
+        $CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
+        $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
+        $CPAN::Config->{make_install_arg}             =~ s/UNINST=1//;
+        $CPAN::Config->{mbuild_install_arg}           =~ s /--uninst\s+1//;
+
+        $LOADED_CPAN = 1;
+
+        return;
+    }
 }
 
 1;
