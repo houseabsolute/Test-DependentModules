@@ -415,17 +415,25 @@ tests. If those dependencies in turn have unsatisfied dependencies, they are
 installed into a temporary directory. These second-level (and third-, etc)
 dependencies are I<not> tested.
 
-In order to avoid prompting, this module attempts set
-C<$ENV{PERL_AUTOINSTALL}> to C<--defaultdeps> and sets
-C<$ENV{PERL_MM_USE_DEFAULT}> to a true value.
+In order to avoid prompting, this module sets C<$ENV{PERL_AUTOINSTALL}> to
+C<--defaultdeps> and sets C<$ENV{PERL_MM_USE_DEFAULT}> to a true value.
 
 Nonetheless, some ill-behaved modules will I<still> wait for a
 prompt. Unfortunately, because of the way this module attempts to keep output
 to a minimum, you won't see these prompts. Patches are welcome.
 
+=head2 Running Tests in Parallel
+
+If you're testing a lot of modules, you might benefit from running tests in
+parallel. You'll need to have L<Parallel::ForkManager> installed for this to
+work.
+
+Set the C<$ENV{PERL_TEST_DM_PROCESSES}> env var to a value greater than 1 to
+enable parallel testing.
+
 =head1 FUNCTIONS
 
-This module optionally exports two functions:
+This module optionally exports three functions:
 
 =head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
@@ -440,7 +448,17 @@ against the I<distribution name>, which will be something like "Test-DependentMo
 Additionally, any distribution name starting with "Task" or "Bundle" is always
 excluded.
 
+=head2 test_modules(@names)
+
+Given a list of module names, this function will test them all. You can use
+this if you'd prefer to hard code a list of modules to test.
+
+In this case, you will have to handle your own test planning.
+
 =head2 test_module($name)
+
+B<DEPRECATED>. Use the C<test_modules()> sub instead, so you can run
+optionally run tests in parallel.
 
 Given a module name, this function will test it. You can use this if you'd
 prefer to hard code a list of modules to test.
