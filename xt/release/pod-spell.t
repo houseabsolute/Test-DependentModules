@@ -24,6 +24,7 @@ all_pod_files_spelling_ok();
 
 __DATA__
 DependentModules
+env
 PayPal
 prereq
 prereqs
