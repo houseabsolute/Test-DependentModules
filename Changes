@@ -1,3 +1,9 @@
+0.09   2011-04-12
+
+- Parallel testing caused bad test output when a test was skipped because a
+  module could not be found on CPAN.
+
+
 0.08   2011-04-12
 
 - This module can now run tests in parallel if you have Parallel::ForkManager
