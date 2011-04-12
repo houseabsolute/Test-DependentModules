@@ -20,7 +20,7 @@ use File::Temp qw( tempdir );
 use IPC::Run3 qw( run3 );
 use Test::More;
 
-our @EXPORT_OK = qw( test_all_dependents test_module );
+our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
 
 # By default, when CPAN is told to be silent, it sends output to a log
 # file. We don't want that to happen.
@@ -71,7 +71,7 @@ sub test_all_dependents {
 
     plan tests => scalar @deps;
 
-    test_module($_) for @deps;
+    test_modules(@deps);
 }
 
 sub _get_deps {
@@ -97,8 +97,43 @@ sub _get_deps {
         map { $_->distribution() } @deps;
 }
 
+sub test_modules {
+    if (   $ENV{PERL_TEST_DM_PROCESSES}
+        && $ENV{PERL_TEST_DM_PROCESSES} > 1
+        && eval { require Parallel::ForkManager } ) {
+
+        my $pm = Parallel::ForkManager->new( $ENV{PERL_TEST_DM_PROCESSES} );
+
+        $pm->run_on_finish(
+            sub {
+                shift;    # pid
+                shift;    # program exit code
+                shift;    # ident
+                shift;    # exit signal
+                shift;    # core dump
+                my $results = shift;
+
+                _test_report(
+                    @{$results}{qw( name passed summary output stderr )} );
+            }
+        );
+
+        for my $module (@_) {
+            $pm->start() and next;
+
+            test_module( $module, $pm );
+        }
+
+        $pm->wait_all_children();
+    }
+    else {
+        test_module($_) for @_;
+    }
+}
+
 sub test_module {
     my $name = shift;
+    my $pm   = shift;
 
     $name =~ s/-/::/g;
 
@@ -129,6 +164,29 @@ sub test_module {
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
 
     my $summary = "$status: $name - " . $dist->base_id() . ' - ' . $dist->author()->id();
+
+    if ($pm) {
+        $pm->finish(
+            0, {
+                name    => $name,
+                passed  => $passed,
+                summary => $summary,
+                output  => $output,
+                stderr  => $stderr,
+            }
+        );
+    }
+    else {
+        _test_report( $name, $passed, $summary, $output, $stderr );
+    }
+}
+
+sub _test_report {
+    my $name    = shift;
+    my $passed  = shift;
+    my $summary = shift;
+    my $output  = shift;
+    my $stderr  = shift;
 
     print { _status_log() } "$summary\n";
     print { _error_log() } "$summary\n";
