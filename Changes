@@ -1,3 +1,9 @@
+{{$NEXT}}
+
+- Test output now includes the distribution id rather than just a module name,
+  meaning you can see the distro version in the ok line.
+
+
 0.09   2011-04-12
 
 - Parallel testing caused bad test output when a test was skipped because a
