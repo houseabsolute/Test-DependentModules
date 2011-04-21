@@ -412,7 +412,7 @@ EOF
 
         CPAN::HandleConfig->load();
         CPAN::Shell::setup_output();
-        CPAN::Index->reload();
+        CPAN::Index->reload('force');
 
         $CPAN::Config->{test_report} = 0;
         $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
