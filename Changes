@@ -1,5 +1,12 @@
 {{$NEXT}}
 
+- Forcibly reload the CPAN index each time this module runs tests. This gives
+  you the best chance of finding the most reecent version of a dependent
+  module.
+
+
+0.10   2011-04-21
+
 - Test output now includes the distribution id rather than just a module name,
   meaning you can see the distro version in the ok line.
 
