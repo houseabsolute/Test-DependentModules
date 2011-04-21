@@ -124,6 +124,8 @@ sub test_module {
         return;
     }
 
+    $name = $dist->base_id();
+
     _install_prereqs($dist);
 
     my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir() );
