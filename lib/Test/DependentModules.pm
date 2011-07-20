@@ -16,6 +16,7 @@ use File::chdir;
 use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
+use Log::Dispatch;
 use Scope::Guard qw( guard );
 use IPC::Run3 qw( run3 );
 use Test::More;
@@ -65,37 +66,70 @@ sub _get_deps {
 
 sub test_modules {
     _load_cpan();
+    _make_logs();
 
+    my $parallel = 0;
     if (   $ENV{PERL_TEST_DM_PROCESSES}
-        && $ENV{PERL_TEST_DM_PROCESSES} > 1
-        && eval { require Parallel::ForkManager } ) {
+        && $ENV{PERL_TEST_DM_PROCESSES} > 1 ) {
 
-        my $pm = Parallel::ForkManager->new( $ENV{PERL_TEST_DM_PROCESSES} );
-
-        $pm->run_on_finish(
-            sub {
-                shift;    # pid
-                shift;    # program exit code
-                shift;    # ident
-                shift;    # exit signal
-                shift;    # core dump
-                my $results = shift;
-
-                _test_report( @{$results}
-                        {qw( name passed summary output stderr skipped )} );
-            } );
-
-        for my $module (@_) {
-            $pm->start() and next;
-
-            test_module( $module, $pm );
+        eval { require Parallel::ForkManager };
+        if ($@) {
+            warn
+                'Cannot run multiple processes without the Parallel::ForkManager module.';
         }
+        else {
+            $parallel = 1;
+        }
+    }
 
-        $pm->wait_all_children();
+    if ($parallel) {
+        _test_in_parallel(@_);
     }
     else {
         test_module($_) for @_;
     }
+}
+
+sub _test_in_parallel {
+    my @modules = @_;
+
+    my $pm = Parallel::ForkManager->new( $ENV{PERL_TEST_DM_PROCESSES} );
+
+    $pm->run_on_finish(
+        sub {
+            shift;    # pid
+            shift;    # program exit code
+            shift;    # ident
+            shift;    # exit signal
+            shift;    # core dump
+            my $results = shift;
+
+            _test_report( @{$results}
+                    {qw( name passed summary output stderr skipped )} );
+        }
+    );
+
+    for my $module (@_) {
+        $pm->start() and next;
+
+        test_module( $module, $pm );
+    }
+
+    $pm->wait_all_children();
+}
+
+sub _load_or_warn {
+    my $module = shift;
+    my $msg    = shift;
+
+    eval "require $module";
+
+    if ( my $e = $@ ) {
+        warn $msg, "\n";
+        return 0;
+    }
+
+    return 1;
 }
 
 sub test_module {
@@ -166,7 +200,7 @@ sub _test_report {
     my $skipped = shift;
 
     if ($skipped) {
-        print { _status_log() } "UNKNOWN : $name (not on CPAN?)\n";
+        _status_log("UNKNOWN : $name (not on CPAN?)\n");
 
     SKIP:
         {
@@ -176,60 +210,52 @@ sub _test_report {
         return;
     }
 
-    print { _status_log() } "$summary\n";
-    print { _error_log() } "$summary\n";
+    _status_log("$summary\n");
+    _error_log("$summary\n");
 
     ok( $passed, "$name passed all tests" );
 
     if ( $passed && !$stderr ) {
-        print { _error_log() } "\n";
+        _error_log("\n");
     }
     else {
-        print { _error_log() } q{-} x 50;
-        print { _error_log() } "\n";
-        print { _error_log() } "$output\n";
+        _error_log( q{-} x 50 );
+        _error_log("\n");
+        _error_log("$output\n");
     }
 }
 
 {
-    my $fh;
+    my %logs;
+
+    sub _make_logs {
+        my $file_class = $ENV{PERL_TEST_DM_PROCESSES}
+            && $ENV{PERL_TEST_DM_PROCESSES} > 1 ? 'File::Locked' : 'File';
+
+        for my $type (qw( status error prereq )) {
+            $logs{$type} = Log::Dispatch->new(
+                outputs => [
+                    [
+                        $file_class,
+                        min_level => 'debug',
+                        filename  => _log_filename($type),
+                        mode      => 'append',
+                    ],
+                ],
+            );
+        }
+    }
 
     sub _status_log {
-        return $fh if defined $fh;
-
-        my $log_file = _log_filename('status');
-
-        open $fh, '>', $log_file;
-
-        return $fh;
+        $logs{status}->info(@_);
     }
-}
-
-{
-    my $fh;
 
     sub _error_log {
-        return $fh if defined $fh;
-
-        my $log_file = _log_filename('error');
-
-        open $fh, '>', $log_file;
-
-        return $fh;
+        $logs{error}->info(@_);
     }
-}
-
-{
-    my $fh;
 
     sub _prereq_log {
-        return $fh if defined $fh;
-
-        my $log_file = _log_filename('prereq');
-
-        open $fh, '>', $log_file;
-
-        return $fh;
+        $logs{prereq}->info(@_);
     }
 }
 
@@ -296,7 +322,7 @@ sub _install_prereqs {
 
         my $installing = $dist->base_id();
 
-        print { _prereq_log() } "Installing $installing for $for_dist\n";
+        _prereq_log( "Installing $installing for $for_dist\n" );
 
         $dist->notest();
         $dist->install();
