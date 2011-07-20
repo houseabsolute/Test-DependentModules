@@ -4,6 +4,10 @@
   you the best chance of finding the most reecent version of a dependent
   module.
 
+- Logging was broken when using multiple processes. The prereq log file would
+  end up appearing under multiple names (potentially one per process), and the
+  files were not locked for writing in each process.
+
 
 0.10   2011-04-21
 
