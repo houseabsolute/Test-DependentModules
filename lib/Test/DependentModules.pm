@@ -118,20 +118,6 @@ sub _test_in_parallel {
     $pm->wait_all_children();
 }
 
-sub _load_or_warn {
-    my $module = shift;
-    my $msg    = shift;
-
-    eval "require $module";
-
-    if ( my $e = $@ ) {
-        warn $msg, "\n";
-        return 0;
-    }
-
-    return 1;
-}
-
 sub test_module {
     my $name = shift;
     my $pm   = shift;
