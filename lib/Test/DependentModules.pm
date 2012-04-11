@@ -18,7 +18,7 @@ use File::Temp qw( tempdir );
 use Log::Dispatch;
 use Scope::Guard qw( guard );
 use IPC::Run3 qw( run3 );
-use Test::More;
+use Test::Builder;
 
 our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
 
@@ -26,6 +26,8 @@ $ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
     File::Spec->catdir( _temp_lib_dir(), 'lib', 'perl5' );
 $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
 $ENV{PERL_MM_USE_DEFAULT} = 1;
+
+my $Test = Test::Builder->new;
 
 sub test_all_dependents {
     my $module = shift;
@@ -36,7 +38,7 @@ sub test_all_dependents {
 
     my @deps = _get_deps( $module, $params );
 
-    plan tests => scalar @deps;
+    $Test->plan(tests => scalar @deps);
 
     test_modules(@deps);
 }
@@ -68,8 +70,8 @@ sub _get_deps {
     # metacpan requires scrolled queries for requests returning more than 5000
     # results, i don't think this will actually be a problem
     if ($result->{hits}{total} > 5000) {
-        diag("Too many reverse dependencies ($result->{hits}{total}), "
-           . "limiting to 5000");
+        $Test->diag("Too many reverse dependencies ($result->{hits}{total}), "
+                  . "limiting to 5000");
     }
 
     my @deps = map { $_->{_source}{distribution} } @{ $result->{hits}{hits} };
@@ -207,10 +209,7 @@ sub _test_report {
     if ($skipped) {
         _status_log("UNKNOWN : $name (not on CPAN?)\n");
 
-    SKIP:
-        {
-            skip "Could not find $name on CPAN", 1;
-        }
+        $Test->skip("Could not find $name on CPAN");
 
         return;
     }
@@ -218,7 +217,7 @@ sub _test_report {
     _status_log("$summary\n");
     _error_log("$summary\n");
 
-    ok( $passed, "$name passed all tests" );
+    $Test->ok( $passed, "$name passed all tests" );
 
     if ( $passed && !$stderr ) {
         _error_log("\n");
@@ -522,8 +521,7 @@ This module optionally exports three functions:
 =head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
 Given a module name, this function uses L<MetaCPAN::API> to find all its
-dependencies and test them. It will call the C<plan()> function from
-L<Test::More> for you.
+dependencies and test them. It will set a test plan for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be
 used to exclude any matching distributions. Note that this will be tested
