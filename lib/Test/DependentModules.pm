@@ -9,7 +9,7 @@ use autodie;
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
 
 use autodie;
-use CPANDB;
+use MetaCPAN::API;
 use Cwd qw( abs_path );
 use Exporter qw( import );
 use File::chdir;
@@ -47,21 +47,39 @@ sub _get_deps {
 
     $module =~ s/::/-/g;
 
-    my $distro = CPANDB->distribution($module);
-
-    my @deps = CPANDB::Dependency->select(
-        'where dependency = ? and ( core is null or core >= ? )',
-        $module, $]
+    my $result = MetaCPAN::API->new->post(
+        "/search/reverse_dependencies/$module",
+        {
+            query => { match_all => {} },
+            size  => 5000,
+            filter => {
+                and => [
+                    {
+                        term => { 'release.status' => 'latest'},
+                    },
+                    {
+                        term => { 'authorized' => 'true' },
+                    },
+                ],
+            },
+        },
     );
+
+    # metacpan requires scrolled queries for requests returning more than 5000
+    # results, i don't think this will actually be a problem
+    if ($result->{hits}{total} > 5000) {
+        diag("Too many reverse dependencies ($result->{hits}{total}), "
+           . "limiting to 5000");
+    }
+
+    my @deps = map { $_->{_source}{distribution} } @{ $result->{hits}{hits} };
 
     my $allow
         = $params->{exclude}
         ? sub { $_[0] !~ /$params->{exclude}/ }
         : sub {1};
 
-    return grep { $_ !~ /^(?:Task|Bundle)/ }
-        grep    { $allow->($_) }
-        map { $_->distribution() } @deps;
+    return grep { $_ !~ /^(?:Task|Bundle)/ } grep { $allow->($_) } @deps;
 }
 
 sub test_modules {
@@ -500,8 +518,9 @@ This module optionally exports three functions:
 
 =head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
-Given a module name, this function uses C<CPANDB> to find all its dependencies
-and test them. It will call the C<plan()> function from L<Test::More> for you.
+Given a module name, this function uses L<MetaCPAN::API> to find all its
+dependencies and test them. It will call the C<plan()> function from
+L<Test::More> for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be
 used to exclude any matching distributions. Note that this will be tested
