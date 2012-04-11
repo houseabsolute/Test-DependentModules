@@ -8,7 +8,6 @@ use autodie;
 # report these tests anyway.
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
 
-use autodie;
 use MetaCPAN::API;
 use Cwd qw( abs_path );
 use Exporter qw( import );
