@@ -33,6 +33,7 @@ sub test_all_dependents {
     my $params = shift;
 
     _load_cpan();
+    _make_logs();
 
     my @deps = _get_deps( $module, $params );
 
@@ -141,6 +142,7 @@ sub test_module {
     my $pm   = shift;
 
     _load_cpan();
+    _make_logs();
 
     $name =~ s/-/::/g;
 
@@ -233,6 +235,8 @@ sub _test_report {
     my %logs;
 
     sub _make_logs {
+        return if %logs;
+
         my $file_class = $ENV{PERL_TEST_DM_PROCESSES}
             && $ENV{PERL_TEST_DM_PROCESSES} > 1 ? 'File::Locked' : 'File';
 
