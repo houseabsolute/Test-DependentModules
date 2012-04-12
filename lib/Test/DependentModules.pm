@@ -40,6 +40,7 @@ sub test_all_dependents {
 
     $Test->plan(tests => scalar @deps);
 
+    local $Test::Builder::Level = $Test::Builder::Level + 1;
     test_modules(@deps);
 }
 
@@ -106,6 +107,7 @@ sub test_modules {
         _test_in_parallel(@_);
     }
     else {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
         test_module($_) for @_;
     }
 }
@@ -124,6 +126,7 @@ sub _test_in_parallel {
             shift;    # core dump
             my $results = shift;
 
+            local $Test::Builder::Level = $Test::Builder::Level + 1;
             _test_report( @{$results}
                     {qw( name passed summary output stderr skipped )} );
         }
@@ -132,6 +135,7 @@ sub _test_in_parallel {
     for my $module (@_) {
         $pm->start() and next;
 
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
         test_module( $module, $pm );
     }
 
@@ -159,6 +163,7 @@ sub test_module {
             );
         }
         else {
+            local $Test::Builder::Level = $Test::Builder::Level + 1;
             _test_report( $name, undef, undef, undef, undef, 'skipped' );
         }
 
@@ -194,6 +199,7 @@ sub test_module {
         );
     }
     else {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
         _test_report( $name, $passed, $summary, $output, $stderr );
     }
 }
