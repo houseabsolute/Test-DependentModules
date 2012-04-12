@@ -16,8 +16,8 @@ use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
 use Log::Dispatch;
-use Scope::Guard qw( guard );
 use IPC::Run3 qw( run3 );
+use Capture::Tiny qw( capture );
 use Test::Builder;
 
 our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
@@ -167,7 +167,7 @@ sub test_module {
 
     $name = $dist->base_id();
 
-    _install_prereqs($dist);
+    capture { _install_prereqs($dist) };
 
     my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir() );
 
@@ -296,15 +296,6 @@ sub _get_distro {
 
 sub _install_prereqs {
     my $dist = shift;
-
-    open my $oldout, '>&STDOUT';
-
-    close STDOUT;
-    open STDOUT, '>', File::Spec->devnull();
-
-    my $guard = guard {
-        open STDOUT, '>&', $oldout;
-    };
 
     $dist->make();
 
