@@ -401,7 +401,15 @@ sub _run_commands {
     for my $cmd (@_) {
         my $output;
 
-        unless ( run3 $cmd, \undef, \$output, \$output ) {
+        my $success = try {
+            run3 $cmd, \undef, \$output, \$output;
+        }
+        catch {
+            $output .= $_;
+            return;
+        };
+
+        if ( !$success ) {
             return ( 0, $output );
         }
     }
@@ -420,12 +428,19 @@ sub _run_tests {
         $error  .= $line;
     };
 
-    if ( -f 'Build.PL' ) {
-        run3 [qw( ./Build test )], undef, \$output, $stderr;
+    try {
+        if ( -f 'Build.PL' ) {
+            run3 [qw( ./Build test )], undef, \$output, $stderr;
+        }
+        else {
+            run3 [qw( make test )], undef, \$output, $stderr;
+        }
     }
-    else {
-        run3 [qw( make test )], undef, \$output, $stderr;
-    }
+    catch {
+        $output .= $_;
+        $error  .= $_;
+        return;
+    };
 
     my $passed = $output =~ /Result: PASS/;
 
