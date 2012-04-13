@@ -405,7 +405,7 @@ sub _run_commands {
             run3 $cmd, \undef, \$output, \$output;
         }
         catch {
-            $output .= $_;
+            $output .= "Couldn't run @$cmd: $_";
             return;
         };
 
@@ -428,17 +428,20 @@ sub _run_tests {
         $error  .= $line;
     };
 
+    my $cmd;
+    if ( -f 'Build.PL' ) {
+        $cmd = [qw( ./Build test )];
+    }
+    else {
+        $cmd = [qw( make test )];
+    }
+
     try {
-        if ( -f 'Build.PL' ) {
-            run3 [qw( ./Build test )], undef, \$output, $stderr;
-        }
-        else {
-            run3 [qw( make test )], undef, \$output, $stderr;
-        }
+        run3 $cmd, undef, \$output, $stderr;
     }
     catch {
-        $output .= $_;
-        $error  .= $_;
+        $output .= "Couldn't run @$cmd: $_";
+        $error  .= "Couldn't run @$cmd: $_";
         return;
     };
 
