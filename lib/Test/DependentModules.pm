@@ -19,6 +19,7 @@ use Log::Dispatch;
 use IPC::Run3 qw( run3 );
 use Capture::Tiny qw( capture );
 use Test::Builder;
+use Try::Tiny;
 
 our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
 
@@ -158,13 +159,16 @@ sub test_module {
             $pm->finish(
                 0, {
                     name    => $name,
-                    skipped => 'skipped',
+                    skipped => "Could not find $name on CPAN",
                 }
             );
         }
         else {
             local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report( $name, undef, undef, undef, undef, 'skipped' );
+            _test_report(
+                $name, undef, undef, undef, undef,
+                "Could not find $name on CPAN"
+            );
         }
 
         return;
@@ -172,7 +176,30 @@ sub test_module {
 
     $name = $dist->base_id();
 
-    capture { _install_prereqs($dist) };
+    my $success = try {
+        capture { _install_prereqs($dist) }; 1;
+    }
+    catch {
+        local $Test::Builder::Level = $Test::Builder::Level + 1;
+        my $msg = "Installing prereqs for $name failed: $_";
+        $msg =~ s/\s*$//;
+        $msg =~ s/\n/\t/g;
+        if ($pm) {
+            $pm->finish(
+                0, {
+                    name    => $name,
+                    skipped => $msg,
+                }
+            );
+        }
+        else {
+            local $Test::Builder::Level = $Test::Builder::Level + 1;
+            _test_report( $name, undef, undef, undef, undef, $msg );
+        }
+
+        return;
+    };
+    return unless $success;
 
     my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir() );
 
@@ -213,9 +240,9 @@ sub _test_report {
     my $skipped = shift;
 
     if ($skipped) {
-        _status_log("UNKNOWN : $name (not on CPAN?)\n");
+        _status_log("UNKNOWN : $name ($skipped)\n");
 
-        $Test->skip("Could not find $name on CPAN");
+        $Test->skip($skipped);
 
         return;
     }
@@ -330,8 +357,13 @@ sub _install_prereqs {
 
         _prereq_log( "Installing $installing for $for_dist\n" );
 
-        $dist->notest();
-        $dist->install();
+        try {
+            $dist->notest();
+            $dist->install();
+        }
+        catch {
+            die "Installing $installing for $for_dist failed: $_";
+        };
     }
 }
 
