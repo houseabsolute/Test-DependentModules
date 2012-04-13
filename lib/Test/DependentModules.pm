@@ -295,6 +295,9 @@ sub _get_distro {
 
     my $dist = $mods[0]->distribution();
 
+    die "Cannot resolve $name to its associated CPAN distribution"
+        unless $dist;
+
     $dist->get();
 
     return $dist;
