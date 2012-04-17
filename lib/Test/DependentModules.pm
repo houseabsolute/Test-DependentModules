@@ -155,19 +155,23 @@ sub test_module {
     my $dist = _get_distro($name);
 
     unless ($dist) {
+        my $summary = "FAIL: $name - ??? - ???";
+        my $output = "Could not find $name on CPAN\n";
         if ($pm) {
             $pm->finish(
                 0, {
                     name    => $name,
                     passed  => 0,
-                    summary => "Could not find $name on CPAN",
+                    summary => $summary,
+                    output  => $output,
+                    stderr  => $output,
                 }
             );
         }
         else {
             local $Test::Builder::Level = $Test::Builder::Level + 1;
             _test_report(
-                $name, 0, "Could not find $name on CPAN", undef, undef, undef
+                $name, 0, $summary, $output, $output, undef
             );
         }
 
