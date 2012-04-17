@@ -315,15 +315,11 @@ sub _get_distro {
 
     my @mods = CPAN::Shell->expand( 'Module', $name );
 
-    die "Cannot resolve $name to a single CPAN module"
-        if @mods > 1;
-
-    return unless @mods;
+    return unless @mods == 1;
 
     my $dist = $mods[0]->distribution();
 
-    die "Cannot resolve $name to its associated CPAN distribution"
-        unless $dist;
+    return unless $dist;
 
     $dist->get();
 
