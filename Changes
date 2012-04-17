@@ -1,5 +1,16 @@
 {{$NEXT}}
 
+- Use MetaCPAN to look up reverse dependencies instead of CPANDB. (doy)
+
+- Silence all of the test running and installing. (doy)
+
+- Avoid dying on avoidable errors (turn them into test fails or skips as
+  appropriate). (doy)
+
+- Use Test::Builder instead of Test::More so $TODO works properly. (doy)
+
+- test_module now also initializes the log files. (doy)
+
 0.12   2011-07-20
 
 - Forcibly reload the CPAN index each time this module runs tests. This gives
