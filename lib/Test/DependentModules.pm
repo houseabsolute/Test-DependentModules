@@ -242,7 +242,7 @@ sub _test_report {
     if ($skipped) {
         _status_log("UNKNOWN : $name ($skipped)\n");
 
-        diag("Skipping $name: $skipped");
+        $Test->diag("Skipping $name: $skipped");
         $Test->skip($skipped);
 
         return;
