@@ -159,15 +159,15 @@ sub test_module {
             $pm->finish(
                 0, {
                     name    => $name,
-                    skipped => "Could not find $name on CPAN",
+                    passed  => 0,
+                    summary => "Could not find $name on CPAN",
                 }
             );
         }
         else {
             local $Test::Builder::Level = $Test::Builder::Level + 1;
             _test_report(
-                $name, undef, undef, undef, undef,
-                "Could not find $name on CPAN"
+                $name, 0, "Could not find $name on CPAN", undef, undef, undef
             );
         }
 
@@ -347,6 +347,10 @@ sub _install_prereqs {
         next if $prereq->[0] eq 'perl';
 
         my $dist = _get_distro( $prereq->[0] );
+        if (!$dist) {
+            _prereq_log( "Couldn't find $prereq->[0] for $for_dist\n" );
+            next;
+        }
         _install_prereqs($dist);
 
         my $installing = $dist->base_id();
