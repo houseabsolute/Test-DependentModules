@@ -155,6 +155,7 @@ sub test_module {
     my $dist = _get_distro($name);
 
     unless ($dist) {
+        $name =~ s/::/-/g;
         my $summary = "FAIL: $name - ??? - ???";
         my $output = "Could not find $name on CPAN\n";
         if ($pm) {
