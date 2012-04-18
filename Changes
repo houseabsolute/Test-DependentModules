@@ -7,7 +7,8 @@
 - Avoid dying on avoidable errors (turn them into test fails or skips as
   appropriate). (doy)
 
-- Use Test::Builder instead of Test::More so $TODO works properly. (doy)
+- Use Test::Builder instead of Test::More so $TODO works properly. Also, mark
+  todo tests in the log files. (doy)
 
 - test_module now also initializes the log files. (doy)
 
