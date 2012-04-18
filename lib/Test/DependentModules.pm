@@ -251,26 +251,26 @@ sub _test_report {
     my $skipped = shift;
 
     if ($skipped) {
-        _status_log("UNKNOWN : $name ($skipped)\n");
+        _status_log("UNKNOWN: $name ($skipped)\n");
+        _error_log("UNKNOWN: $name ($skipped)\n");
 
         $Test->diag("Skipping $name: $skipped");
         $Test->skip($skipped);
+    }
+    else {
+        _status_log("$summary\n");
+        _error_log("$summary\n");
 
-        return;
+        $Test->ok( $passed, "$name passed all tests" );
     }
 
-    _status_log("$summary\n");
-    _error_log("$summary\n");
-
-    $Test->ok( $passed, "$name passed all tests" );
-
-    if ( $passed && !$stderr ) {
+    if ( $passed || $skipped ) {
         _error_log("\n");
     }
     else {
         _error_log( q{-} x 50 );
         _error_log("\n");
-        _error_log("$output\n");
+        _error_log("$output\n") if defined $output;
     }
 }
 
