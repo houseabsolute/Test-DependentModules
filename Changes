@@ -11,6 +11,8 @@
 
 - test_module now also initializes the log files. (doy)
 
+- configure_requires are now respected properly. (doy)
+
 0.12   2011-07-20
 
 - Forcibly reload the CPAN index each time this module runs tests. This gives

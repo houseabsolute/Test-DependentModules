@@ -335,8 +335,6 @@ sub _get_distro {
 sub _install_prereqs {
     my $dist = shift;
 
-    $dist->make();
-
     my $install_dir = _temp_lib_dir();
 
     local $CPAN::Config->{makepl_arg} .= " INSTALL_BASE=$install_dir";
@@ -345,32 +343,46 @@ sub _install_prereqs {
 
     my $for_dist = $dist->base_id();
 
-    for my $prereq (
-        $dist->unsat_prereq('configure_requires_later'),
-        $dist->unsat_prereq('later')
-        ) {
-
-        next if $prereq->[0] eq 'perl';
-
-        my $dist = _get_distro( $prereq->[0] );
-        if (!$dist) {
-            _prereq_log( "Couldn't find $prereq->[0] for $for_dist\n" );
-            next;
-        }
-        _install_prereqs($dist);
-
-        my $installing = $dist->base_id();
-
-        _prereq_log( "Installing $installing for $for_dist\n" );
-
-        try {
-            $dist->notest();
-            $dist->install();
-        }
-        catch {
-            die "Installing $installing for $for_dist failed: $_";
-        };
+    for my $prereq ( $dist->unsat_prereq('configure_requires_later') ) {
+        _install_prereq( $prereq->[0], $for_dist );
     }
+
+    # XXX basically just making this up (because the CPAN.pm source is
+    # impossible to follow), but ->make doesn't actually do anything if these
+    # keys exist
+    delete $dist->{configure_requires_later};
+    delete $dist->{configure_requires_later_for};
+
+    $dist->make();
+
+    for my $prereq ( $dist->unsat_prereq('later') ) {
+        _install_prereq( $prereq->[0], $for_dist );
+    }
+}
+
+sub _install_prereq {
+    my ($prereq, $for_dist) = @_;
+
+    return if $prereq eq 'perl';
+
+    my $dist = _get_distro( $prereq );
+    if (!$dist) {
+        _prereq_log( "Couldn't find $prereq for $for_dist\n" );
+        next;
+    }
+    _install_prereqs($dist);
+
+    my $installing = $dist->base_id();
+
+    _prereq_log( "Installing $installing for $for_dist\n" );
+
+    try {
+        $dist->notest();
+        $dist->install();
+    }
+    catch {
+        die "Installing $installing for $for_dist failed: $_";
+    };
 }
 
 {
