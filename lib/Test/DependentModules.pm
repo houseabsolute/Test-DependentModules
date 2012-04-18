@@ -156,7 +156,10 @@ sub test_module {
 
     unless ($dist) {
         $name =~ s/::/-/g;
-        my $summary = "FAIL: $name - ??? - ???";
+        my $todo = defined($Test->todo)
+            ? ' (TODO: ' . $Test->todo . ')'
+            : '';
+        my $summary = "FAIL${todo}: $name - ??? - ???";
         my $output = "Could not find $name on CPAN\n";
         if ($pm) {
             $pm->finish(
