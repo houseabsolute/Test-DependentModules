@@ -216,6 +216,9 @@ sub test_module {
         if $stderr =~ /\A\# Testing [\w:]+ [^\n]+\Z/;
 
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
+    if (my $reason = $Test->todo) {
+        $status .= " (TODO: $reason)";
+    }
 
     my $summary = "$status: $name - " . $dist->base_id() . ' - ' . $dist->author()->id();
 
