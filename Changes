@@ -10,9 +10,9 @@
 - Use Test::Builder instead of Test::More so $TODO works properly. Also, mark
   todo tests in the log files. (doy)
 
-- test_module now also initializes the log files. (doy)
+- The test_module sub now also initializes the log files. (doy)
 
-- configure_requires are now respected properly. (doy)
+- A distro's configure_requires prereqs are now respected. (doy)
 
 
 0.12   2011-07-20
