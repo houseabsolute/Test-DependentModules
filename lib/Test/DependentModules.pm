@@ -15,6 +15,7 @@ use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
 use File::chdir;
+use IO::Handle::Util; # used for CPAN::Shell monkey patch
 use IPC::Run3 qw( run3 );
 use Log::Dispatch;
 use MetaCPAN::API;
