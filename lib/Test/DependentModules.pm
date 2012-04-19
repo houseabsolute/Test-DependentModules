@@ -8,16 +8,16 @@ use autodie;
 # report these tests anyway.
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
 
-use MetaCPAN::API;
+use Capture::Tiny qw( capture );
 use Cwd qw( abs_path );
 use Exporter qw( import );
-use File::chdir;
 use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
-use Log::Dispatch;
+use File::chdir;
 use IPC::Run3 qw( run3 );
-use Capture::Tiny qw( capture );
+use Log::Dispatch;
+use MetaCPAN::API;
 use Test::Builder;
 use Try::Tiny;
 
