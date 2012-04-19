@@ -17,10 +17,6 @@
 
 0.12   2011-07-20
 
-- Forcibly reload the CPAN index each time this module runs tests. This gives
-  you the best chance of finding the most reecent version of a dependent
-  module.
-
 - Logging was broken when using multiple processes. The prereq log file would
   end up appearing under multiple names (potentially one per process), and the
   files were not locked for writing in each process.
@@ -28,6 +24,13 @@
 - The directory to which prereqs were installed got cleaned out after each
   process exited when running multiple processes, which often cause false
   failures for modules being tested.
+
+
+0.11   2011-04-21
+
+- Forcibly reload the CPAN index each time this module runs tests. This gives
+  you the best chance of finding the most reecent version of a dependent
+  module.
 
 
 0.10   2011-04-21
