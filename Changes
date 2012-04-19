@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.13   2012-04-19
+
 - Use MetaCPAN to look up reverse dependencies instead of CPANDB. (doy)
 
 - Silence all of the test running and installing. (doy)
