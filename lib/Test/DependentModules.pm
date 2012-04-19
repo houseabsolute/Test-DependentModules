@@ -513,7 +513,7 @@ EOF
     sub _load_cpan {
         return if $LOADED_CPAN;
 
-        require CPAN;
+        require CPAN 1.9402;
         require CPAN::Shell;
 
         {
