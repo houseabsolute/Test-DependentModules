@@ -28,7 +28,7 @@ $ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
 $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
 $ENV{PERL_MM_USE_DEFAULT} = 1;
 
-my $Test = Test::Builder->new;
+my $Test = Test::Builder->new();
 
 sub test_all_dependents {
     my $module = shift;
@@ -39,7 +39,7 @@ sub test_all_dependents {
 
     my @deps = _get_deps( $module, $params );
 
-    $Test->plan(tests => scalar @deps);
+    $Test->plan( tests => scalar @deps );
 
     local $Test::Builder::Level = $Test::Builder::Level + 1;
     test_modules(@deps);
@@ -51,15 +51,15 @@ sub _get_deps {
 
     $module =~ s/::/-/g;
 
-    my $result = MetaCPAN::API->new->post(
+    my $result = MetaCPAN::API->new()->post(
         "/search/reverse_dependencies/$module",
         {
-            query => { match_all => {} },
-            size  => 5000,
+            query  => { match_all => {} },
+            size   => 5000,
             filter => {
                 and => [
                     {
-                        term => { 'release.status' => 'latest'},
+                        term => { 'release.status' => 'latest' },
                     },
                     {
                         term => { 'authorized' => 'true' },
@@ -71,9 +71,10 @@ sub _get_deps {
 
     # metacpan requires scrolled queries for requests returning more than 5000
     # results, i don't think this will actually be a problem
-    if ($result->{hits}{total} > 5000) {
-        $Test->diag("Too many reverse dependencies ($result->{hits}{total}), "
-                  . "limiting to 5000");
+    if ( $result->{hits}{total} > 5000 ) {
+        $Test->diag(
+                  "Too many reverse dependencies ($result->{hits}{total}), "
+                . "limiting to 5000" );
     }
 
     my @deps = map { $_->{_source}{distribution} } @{ $result->{hits}{hits} };
@@ -81,7 +82,7 @@ sub _get_deps {
     my $allow
         = $params->{exclude}
         ? sub { $_[0] !~ /$params->{exclude}/ }
-        : sub {1};
+        : sub { 1 };
 
     return grep { $_ !~ /^(?:Task|Bundle)/ } grep { $allow->($_) } @deps;
 }
@@ -156,14 +157,16 @@ sub test_module {
 
     unless ($dist) {
         $name =~ s/::/-/g;
-        my $todo = defined($Test->todo)
-            ? ' (TODO: ' . $Test->todo . ')'
+        my $todo
+            = defined( $Test->todo() )
+            ? ' (TODO: ' . $Test->todo() . ')'
             : '';
         my $summary = "FAIL${todo}: $name - ??? - ???";
-        my $output = "Could not find $name on CPAN\n";
+        my $output  = "Could not find $name on CPAN\n";
         if ($pm) {
             $pm->finish(
-                0, {
+                0,
+                {
                     name    => $name,
                     passed  => 0,
                     summary => $summary,
@@ -174,9 +177,7 @@ sub test_module {
         }
         else {
             local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report(
-                $name, 0, $summary, $output, $output, undef
-            );
+            _test_report( $name, 0, $summary, $output, $output, undef );
         }
 
         return;
@@ -185,7 +186,8 @@ sub test_module {
     $name = $dist->base_id();
 
     my $success = try {
-        capture { _install_prereqs($dist) }; 1;
+        capture { _install_prereqs($dist) };
+        1;
     }
     catch {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
@@ -194,7 +196,8 @@ sub test_module {
         $msg =~ s/\n/\t/g;
         if ($pm) {
             $pm->finish(
-                0, {
+                0,
+                {
                     name    => $name,
                     skipped => $msg,
                 }
@@ -207,11 +210,13 @@ sub test_module {
 
         return;
     };
+
     return unless $success;
 
     my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir() );
 
     $stderr = q{}
+
         # A lot of modules seem to have cargo-culted a diag() that looks like
         # this ...
         #
@@ -219,15 +224,19 @@ sub test_module {
         if $stderr =~ /\A\# Testing [\w:]+ [^\n]+\Z/;
 
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
-    if (my $reason = $Test->todo) {
+    if ( my $reason = $Test->todo() ) {
         $status .= " (TODO: $reason)";
     }
 
-    my $summary = "$status: $name - " . $dist->base_id() . ' - ' . $dist->author()->id();
+    my $summary
+        = "$status: $name - "
+        . $dist->base_id() . ' - '
+        . $dist->author()->id();
 
     if ($pm) {
         $pm->finish(
-            0, {
+            0,
+            {
                 name    => $name,
                 passed  => $passed,
                 summary => $summary,
@@ -367,20 +376,21 @@ sub _install_prereqs {
 }
 
 sub _install_prereq {
-    my ($prereq, $for_dist) = @_;
+    my ( $prereq, $for_dist ) = @_;
 
     return if $prereq eq 'perl';
 
-    my $dist = _get_distro( $prereq );
-    if (!$dist) {
-        _prereq_log( "Couldn't find $prereq for $for_dist\n" );
+    my $dist = _get_distro($prereq);
+    if ( !$dist ) {
+        _prereq_log("Couldn't find $prereq for $for_dist\n");
         next;
     }
+
     _install_prereqs($dist);
 
     my $installing = $dist->base_id();
 
-    _prereq_log( "Installing $installing for $for_dist\n" );
+    _prereq_log("Installing $installing for $for_dist\n");
 
     try {
         $dist->notest();
