@@ -437,16 +437,15 @@ sub _run_commands {
         my $output;
 
         my $success = try {
-            run3 $cmd, \undef, \$output, \$output;
+            run3( $cmd, \undef, \$output, \$output );
         }
         catch {
             $output .= "Couldn't run @$cmd: $_";
             return;
         };
 
-        if ( !$success ) {
-            return ( 0, $output );
-        }
+        return ( 0, $output )
+            unless $success;
     }
 
     return 1;
@@ -472,7 +471,7 @@ sub _run_tests {
     }
 
     try {
-        run3 $cmd, undef, \$output, $stderr;
+        run3( $cmd, undef, \$output, $stderr );
     }
     catch {
         $output .= "Couldn't run @$cmd: $_";
