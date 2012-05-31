@@ -463,11 +463,14 @@ sub _run_tests {
     };
 
     my $cmd;
-    if ( -f 'Build.PL' ) {
+    if ( -f 'Build' ) {
         $cmd = [qw( ./Build test )];
     }
-    else {
+    elsif ( -f 'Makefile' ) {
         $cmd = [qw( make test )];
+    }
+    else {
+        return ( 0, "Cannot find a Build or Makefile file in $CWD" );
     }
 
     try {
