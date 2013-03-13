@@ -111,7 +111,9 @@ sub test_modules {
     }
     else {
         local $Test::Builder::Level = $Test::Builder::Level + 1;
-        test_module($_) for @_;
+        for my $module (@_) {
+            test_module($_);
+        }
     }
 }
 
