@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- Fix a bug where the value of $_ in a loop could be overwritten in
+  test_modules. (Graham Knopp).
+
+
 0.13   2012-04-19
 
 - Use MetaCPAN to look up reverse dependencies instead of CPANDB. (doy)
