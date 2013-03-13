@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.14   2013-03-13
+
 - Fix a bug where the value of $_ in a loop could be overwritten in
   test_modules. (Graham Knopp).
 
