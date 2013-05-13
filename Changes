@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- The change in 0.14 broke non-parallel testing in the test_modules()
+  subroutine. Reported by Graham Knopp.
+
+
 0.14   2013-03-13
 
 - Fix a bug where the value of $_ in a loop could be overwritten in
