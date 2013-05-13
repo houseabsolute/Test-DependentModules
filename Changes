@@ -7,24 +7,27 @@
 0.14   2013-03-13
 
 - Fix a bug where the value of $_ in a loop could be overwritten in
-  test_modules. (Graham Knopp).
+  test_modules. Patch by Graham Knopp.
 
 
 0.13   2012-04-19
 
-- Use MetaCPAN to look up reverse dependencies instead of CPANDB. (doy)
+- Use MetaCPAN to look up reverse dependencies instead of CPANDB. Patch by
+  Jesse Luehrs.
 
-- Silence all of the test running and installing. (doy)
+- Silence all of the test running and installing. Patch by Jesse Luehrs.
 
 - Avoid dying on avoidable errors (turn them into test fails or skips as
-  appropriate). (doy)
+  appropriate). Patch by Jesse Luehrs.
 
 - Use Test::Builder instead of Test::More so $TODO works properly. Also, mark
-  todo tests in the log files. (doy)
+  todo tests in the log files. Patch by Jesse Luehrs.
 
-- The test_module sub now also initializes the log files. (doy)
+- The test_module sub now also initializes the log files. Patch by Jesse
+  Luehrs.
 
-- A distro's configure_requires prereqs are now respected. (doy)
+- A distro's configure_requires prereqs are now respected. Patch by Jesse
+  Luehrs.
 
 
 0.12   2011-07-20
