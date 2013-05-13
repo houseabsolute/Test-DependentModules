@@ -1,7 +1,7 @@
 {{$NEXT}}
 
 - The change in 0.14 broke non-parallel testing in the test_modules()
-  subroutine. Reported by Graham Knopp.
+  subroutine. This was my fault, not Graham's. Reported by Graham Knopp.
 
 
 0.14   2013-03-13
