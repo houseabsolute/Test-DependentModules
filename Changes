@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.15   2013-05-13
+
 - The change in 0.14 broke non-parallel testing in the test_modules()
   subroutine. This was my fault, not Graham's. Reported by Graham Knopp.
 
