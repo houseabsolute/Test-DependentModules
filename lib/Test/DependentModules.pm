@@ -474,16 +474,17 @@ sub _run_tests {
         return ( 0, "Cannot find a Build or Makefile file in $CWD" );
     }
 
+    my $passed;
     try {
         run3( $cmd, undef, \$output, $stderr );
+        if ($? == 0) {
+            $passed = $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
+        }
     }
     catch {
         $output .= "Couldn't run @$cmd: $_";
         $error  .= "Couldn't run @$cmd: $_";
-        return;
     };
-
-    my $passed = $output =~ /Result: PASS/;
 
     return ( $passed, $output, $error );
 }
