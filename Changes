@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.17   2013-07-13
+
 - Packaging fixes so CPAN ignores our test corpus modules. Patch by Graham
   Knopp.
 
