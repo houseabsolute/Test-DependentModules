@@ -1,5 +1,13 @@
 {{$NEXT}}
 
+0.16   2013-07-13
+
+- Distros where all tests are skipped or where no tests exist are considered
+  as passing. Previously they were a failure. Fixed by Graham Knopp.
+
+- Added some real tests. Written by Graham Knopp.
+
+
 0.15   2013-05-13
 
 - The change in 0.14 broke non-parallel testing in the test_modules()

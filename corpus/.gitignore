@@ -1,0 +1,6 @@
+/*/*
+!/*/lib/
+!/*/t/
+!/*/Makefile.PL
+!/*/Build.PL
+!/*/META.json
