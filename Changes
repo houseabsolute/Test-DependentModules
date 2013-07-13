@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.16   2013-07-13
+
 - Distros where all tests are skipped or where no tests exist are considered
   as passing. Previously they were a failure. Fixed by Graham Knopp.
 
