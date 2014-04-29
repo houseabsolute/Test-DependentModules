@@ -492,39 +492,20 @@ sub _run_tests {
 {
     my $LOADED_CPAN = 0;
 
-    # By default, when CPAN is told to be silent, it sends output to a log
-    # file. We don't want that to happen.
-    my $monkey_patch = <<'EOF';
-{
-    package
-        CPAN::Shell;
-
     use IO::Handle::Util qw( io_from_write_cb );
 
-    no warnings 'redefine';
-
-    my $fh;
-    if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
-        $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
-    }
-    else {
-        open $fh, '>', File::Spec->devnull();
-    }
-
-    sub report_fh {$fh}
-}
-EOF
-
     sub _load_cpan {
+        no warnings 'once';
         return if $LOADED_CPAN;
 
         require CPAN;
         require CPAN::Shell;
 
+        open my $fh, '>', File::Spec->devnull();
+
         {
-            local $@;
-            eval $monkey_patch;
-            die $@ if $@;
+            no warnings 'redefine';
+            *CPAN::Shell::report_fh = sub { $fh };
         }
 
         $CPAN::Be_Silent = 1;
@@ -540,6 +521,10 @@ EOF
         $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
         $CPAN::Config->{make_install_arg}             =~ s/UNINST=1//;
         $CPAN::Config->{mbuild_install_arg}           =~ s /--uninst\s+1//;
+
+        if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
+            $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
+        }
 
         $LOADED_CPAN = 1;
 
