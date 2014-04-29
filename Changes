@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- A distro which used Module::Build and ran no tests would be marked as
+  failure. Fixed by Graham Knop.
+
+
 0.17   2013-07-13
 
 - Packaging fixes so CPAN ignores our test corpus modules. Patch by Graham

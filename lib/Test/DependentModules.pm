@@ -477,8 +477,9 @@ sub _run_tests {
     my $passed;
     try {
         run3( $cmd, undef, \$output, $stderr );
-        if ($? == 0) {
-            $passed = $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
+        if ( $? == 0 ) {
+            $passed = $output eq ''
+                || $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
         }
     }
     catch {
