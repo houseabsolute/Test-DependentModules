@@ -6,6 +6,9 @@
 - Under debug mode, the output from the CPAN module's init phase is no longer
   output via diag() calls. Patch by Graham Knop.
 
+- Better handling of module prereqs which in turn share prereqs with the
+  module we're installing. Patch by Graham Knop.
+
 
 0.17   2013-07-13
 
