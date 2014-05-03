@@ -15,7 +15,7 @@ use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
 use File::chdir;
-use IO::Handle::Util; # used for CPAN::Shell monkey patch
+use IO::Handle::Util;    # used for CPAN::Shell monkey patch
 use IPC::Run3 qw( run3 );
 use Log::Dispatch;
 use MetaCPAN::API;
@@ -132,8 +132,9 @@ sub _test_in_parallel {
             my $results = shift;
 
             local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report( @{$results}
-                    {qw( name passed summary output stderr skipped )} );
+            _test_report(
+                @{$results}{qw( name passed summary output stderr skipped )}
+            );
         }
     );
 
@@ -537,10 +538,10 @@ EOF
         $CPAN::Config->{test_report} = 0;
         $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
         $CPAN::Config->{prerequisites_policy} = 'follow';
-        $CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
+        $CPAN::Config->{make_install_make_command} =~ s/^sudo //;
         $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
-        $CPAN::Config->{make_install_arg}             =~ s/UNINST=1//;
-        $CPAN::Config->{mbuild_install_arg}           =~ s /--uninst\s+1//;
+        $CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
+        $CPAN::Config->{mbuild_install_arg} =~ s /--uninst\s+1//;
 
         $LOADED_CPAN = 1;
 
