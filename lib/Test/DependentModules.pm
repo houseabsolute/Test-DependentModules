@@ -163,7 +163,7 @@ sub test_module {
         my $todo
             = defined( $Test->todo() )
             ? ' (TODO: ' . $Test->todo() . ')'
-            : '';
+            : q{};
         my $summary = "FAIL${todo}: $name - ??? - ???";
         my $output  = "Could not find $name on CPAN\n";
         if ($pm) {
@@ -478,7 +478,7 @@ sub _run_tests {
     try {
         run3( $cmd, undef, \$output, $stderr );
         if ( $? == 0 ) {
-            $passed = $output eq ''
+            $passed = $output eq q{}
                 || $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
         }
     }
