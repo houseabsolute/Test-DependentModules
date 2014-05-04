@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.18   2014-05-04
+
 - A distro which used Module::Build and ran no tests would be marked as
   failure. Fixed by Graham Knop.
 
