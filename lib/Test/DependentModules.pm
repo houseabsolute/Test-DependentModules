@@ -539,18 +539,18 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Test::DependentModules qw( test_all_dependents );
+    use Test::DependentModules qw( test_all_dependents );
 
-  test_all_dependents('My::Module');
+    test_all_dependents('My::Module');
 
-  # or ...
+    # or ...
 
-  use Test::DependentModules qw( test_module );
-  use Test::More tests => 3;
+    use Test::DependentModules qw( test_module );
+    use Test::More tests => 3;
 
-  test_module('Exception::Class');
-  test_module('DateTime');
-  test_module('Log::Dispatch');
+    test_module('Exception::Class');
+    test_module('DateTime');
+    test_module('Log::Dispatch');
 
 =head1 DESCRIPTION
 
