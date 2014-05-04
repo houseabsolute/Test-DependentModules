@@ -365,17 +365,14 @@ sub _install_prereqs {
         _install_prereq( $prereq->[0], $for_dist );
     }
 
-    # XXX basically just making this up (because the CPAN.pm source is
-    # impossible to follow), but ->make doesn't actually do anything if these
-    # keys exist
-    delete $dist->{configure_requires_later};
-    delete $dist->{configure_requires_later_for};
+    $dist->undelay;
 
     $dist->make();
 
     for my $prereq ( $dist->unsat_prereq('later') ) {
         _install_prereq( $prereq->[0], $for_dist );
     }
+    $dist->undelay;
 }
 
 sub _install_prereq {
