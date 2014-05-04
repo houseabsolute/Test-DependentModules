@@ -365,14 +365,14 @@ sub _install_prereqs {
         _install_prereq( $prereq->[0], $for_dist );
     }
 
-    $dist->undelay;
-
+    $dist->undelay();
     $dist->make();
 
     for my $prereq ( $dist->unsat_prereq('later') ) {
         _install_prereq( $prereq->[0], $for_dist );
     }
-    $dist->undelay;
+
+    $dist->undelay();
 }
 
 sub _install_prereq {
