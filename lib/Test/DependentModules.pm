@@ -18,7 +18,7 @@ use File::chdir;
 use IO::Handle::Util qw( io_from_write_cb );
 use IPC::Run3 qw( run3 );
 use Log::Dispatch;
-use MetaCPAN::API;
+use MetaCPAN::Client;
 use Test::Builder;
 use Try::Tiny;
 
@@ -52,40 +52,22 @@ sub _get_deps {
 
     $module =~ s/::/-/g;
 
-    my $result = MetaCPAN::API->new()->post(
-        "/search/reverse_dependencies/$module",
-        {
-            query  => { match_all => {} },
-            size   => 5000,
-            filter => {
-                and => [
-                    {
-                        term => { 'release.status' => 'latest' },
-                    },
-                    {
-                        term => { 'authorized' => 'true' },
-                    },
-                ],
-            },
-        },
-    );
-
-    # metacpan requires scrolled queries for requests returning more than 5000
-    # results, i don't think this will actually be a problem
-    if ( $result->{hits}{total} > 5000 ) {
-        $Test->diag(
-                  "Too many reverse dependencies ($result->{hits}{total}), "
-                . "limiting to 5000" );
-    }
-
-    my @deps = map { $_->{_source}{distribution} } @{ $result->{hits}{hits} };
+    my $rev_deps = MetaCPAN::Client->new()->rev_deps($module);
 
     my $allow
         = $params->{exclude}
         ? sub { $_[0] !~ /$params->{exclude}/ }
         : sub { 1 };
 
-    return grep { $_ !~ /^(?:Task|Bundle)/ } grep { $allow->($_) } @deps;
+    my @deps;
+    while ( my $dep = $rev_deps->next ) {
+        next unless $allow->($dep);
+        next if $dep =~ /^(?:Task|Bundle)/;
+
+        push @deps => $dep;
+    }
+
+    return @deps;
 }
 
 sub test_modules {
@@ -591,7 +573,7 @@ This module optionally exports three functions:
 
 =head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
-Given a module name, this function uses L<MetaCPAN::API> to find all its
+Given a module name, this function uses L<MetaCPAN::Client> to find all its
 dependencies and test them. It will set a test plan for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be
