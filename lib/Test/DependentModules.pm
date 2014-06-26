@@ -15,10 +15,10 @@ use File::Path qw( rmtree );
 use File::Spec;
 use File::Temp qw( tempdir );
 use File::chdir;
-use IO::Handle::Util; # used for CPAN::Shell monkey patch
+use IO::Handle::Util qw( io_from_write_cb );
 use IPC::Run3 qw( run3 );
 use Log::Dispatch;
-use MetaCPAN::API;
+use MetaCPAN::Client;
 use Test::Builder;
 use Try::Tiny;
 
@@ -52,40 +52,22 @@ sub _get_deps {
 
     $module =~ s/::/-/g;
 
-    my $result = MetaCPAN::API->new()->post(
-        "/search/reverse_dependencies/$module",
-        {
-            query  => { match_all => {} },
-            size   => 5000,
-            filter => {
-                and => [
-                    {
-                        term => { 'release.status' => 'latest' },
-                    },
-                    {
-                        term => { 'authorized' => 'true' },
-                    },
-                ],
-            },
-        },
-    );
-
-    # metacpan requires scrolled queries for requests returning more than 5000
-    # results, i don't think this will actually be a problem
-    if ( $result->{hits}{total} > 5000 ) {
-        $Test->diag(
-                  "Too many reverse dependencies ($result->{hits}{total}), "
-                . "limiting to 5000" );
-    }
-
-    my @deps = map { $_->{_source}{distribution} } @{ $result->{hits}{hits} };
+    my $rev_deps = MetaCPAN::Client->new()->rev_deps($module);
 
     my $allow
         = $params->{exclude}
         ? sub { $_[0] !~ /$params->{exclude}/ }
         : sub { 1 };
 
-    return grep { $_ !~ /^(?:Task|Bundle)/ } grep { $allow->($_) } @deps;
+    my @deps;
+    while ( my $dep = $rev_deps->next ) {
+        next unless $allow->($dep);
+        next if $dep =~ /^(?:Task|Bundle)/;
+
+        push @deps => $dep;
+    }
+
+    return @deps;
 }
 
 sub test_modules {
@@ -132,8 +114,9 @@ sub _test_in_parallel {
             my $results = shift;
 
             local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report( @{$results}
-                    {qw( name passed summary output stderr skipped )} );
+            _test_report(
+                @{$results}{qw( name passed summary output stderr skipped )}
+            );
         }
     );
 
@@ -163,7 +146,7 @@ sub test_module {
         my $todo
             = defined( $Test->todo() )
             ? ' (TODO: ' . $Test->todo() . ')'
-            : '';
+            : q{};
         my $summary = "FAIL${todo}: $name - ??? - ???";
         my $output  = "Could not find $name on CPAN\n";
         if ($pm) {
@@ -364,17 +347,14 @@ sub _install_prereqs {
         _install_prereq( $prereq->[0], $for_dist );
     }
 
-    # XXX basically just making this up (because the CPAN.pm source is
-    # impossible to follow), but ->make doesn't actually do anything if these
-    # keys exist
-    delete $dist->{configure_requires_later};
-    delete $dist->{configure_requires_later_for};
-
+    $dist->undelay();
     $dist->make();
 
     for my $prereq ( $dist->unsat_prereq('later') ) {
         _install_prereq( $prereq->[0], $for_dist );
     }
+
+    $dist->undelay();
 }
 
 sub _install_prereq {
@@ -477,8 +457,9 @@ sub _run_tests {
     my $passed;
     try {
         run3( $cmd, undef, \$output, $stderr );
-        if ($? == 0) {
-            $passed = $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
+        if ( $? == 0 ) {
+            $passed = $output eq q{}
+                || $output =~ /Result: (?:PASS|NOTESTS)|No tests defined/;
         }
     }
     catch {
@@ -492,39 +473,18 @@ sub _run_tests {
 {
     my $LOADED_CPAN = 0;
 
-    # By default, when CPAN is told to be silent, it sends output to a log
-    # file. We don't want that to happen.
-    my $monkey_patch = <<'EOF';
-{
-    package
-        CPAN::Shell;
-
-    use IO::Handle::Util qw( io_from_write_cb );
-
-    no warnings 'redefine';
-
-    my $fh;
-    if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
-        $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
-    }
-    else {
-        open $fh, '>', File::Spec->devnull();
-    }
-
-    sub report_fh {$fh}
-}
-EOF
-
     sub _load_cpan {
+        no warnings 'once';
         return if $LOADED_CPAN;
 
         require CPAN;
         require CPAN::Shell;
 
+        open my $fh, '>', File::Spec->devnull();
+
         {
-            local $@;
-            eval $monkey_patch;
-            die $@ if $@;
+            no warnings 'redefine';
+            *CPAN::Shell::report_fh = sub { $fh };
         }
 
         $CPAN::Be_Silent = 1;
@@ -536,10 +496,14 @@ EOF
         $CPAN::Config->{test_report} = 0;
         $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
         $CPAN::Config->{prerequisites_policy} = 'follow';
-        $CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
+        $CPAN::Config->{make_install_make_command} =~ s/^sudo //;
         $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
-        $CPAN::Config->{make_install_arg}             =~ s/UNINST=1//;
-        $CPAN::Config->{mbuild_install_arg}           =~ s /--uninst\s+1//;
+        $CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
+        $CPAN::Config->{mbuild_install_arg} =~ s /--uninst\s+1//;
+
+        if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
+            $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
+        }
 
         $LOADED_CPAN = 1;
 
@@ -557,18 +521,18 @@ __END__
 
 =head1 SYNOPSIS
 
-  use Test::DependentModules qw( test_all_dependents );
+    use Test::DependentModules qw( test_all_dependents );
 
-  test_all_dependents('My::Module');
+    test_all_dependents('My::Module');
 
-  # or ...
+    # or ...
 
-  use Test::DependentModules qw( test_module );
-  use Test::More tests => 3;
+    use Test::DependentModules qw( test_module );
+    use Test::More tests => 3;
 
-  test_module('Exception::Class');
-  test_module('DateTime');
-  test_module('Log::Dispatch');
+    test_module('Exception::Class');
+    test_module('DateTime');
+    test_module('Log::Dispatch');
 
 =head1 DESCRIPTION
 
@@ -609,7 +573,7 @@ This module optionally exports three functions:
 
 =head2 test_all_dependents( $module, { exclude => qr/.../ } )
 
-Given a module name, this function uses L<MetaCPAN::API> to find all its
+Given a module name, this function uses L<MetaCPAN::Client> to find all its
 dependencies and test them. It will set a test plan for you.
 
 If you want to exclude some dependencies, you can pass a regex which will be

@@ -1,5 +1,21 @@
 {{$NEXT}}
 
+- Switched from the now deprecated MetaCPAN::API to the shiny new
+  MetaCPAN::Client. Patch by Mickey. PR #7.
+
+
+0.18   2014-05-04
+
+- A distro which used Module::Build and ran no tests would be marked as
+  failure. Fixed by Graham Knop.
+
+- Under debug mode, the output from the CPAN module's init phase is no longer
+  output via diag() calls. Patch by Graham Knop.
+
+- Better handling of module prereqs which in turn share prereqs with the
+  module we're installing. Patch by Graham Knop.
+
+
 0.17   2013-07-13
 
 - Packaging fixes so CPAN ignores our test corpus modules. Patch by Graham
