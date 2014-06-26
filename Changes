@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.19   2014-06-26
+
 - Switched from the now deprecated MetaCPAN::API to the shiny new
   MetaCPAN::Client. Patch by Mickey. PR #7.
 
