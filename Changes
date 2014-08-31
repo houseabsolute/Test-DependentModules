@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.20   2014-08-31
+
 - The use of MetaCPAN::Client was a bit broken. Patch by Sawyer X. PR #8.
 
 

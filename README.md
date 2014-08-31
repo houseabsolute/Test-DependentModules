@@ -4,7 +4,7 @@ Test::DependentModules - Test all modules which depend on your module
 
 # VERSION
 
-version 0.19
+version 0.20
 
 # SYNOPSIS
 
