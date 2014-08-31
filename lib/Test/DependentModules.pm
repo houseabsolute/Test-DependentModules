@@ -61,10 +61,12 @@ sub _get_deps {
 
     my @deps;
     while ( my $dep = $rev_deps->next ) {
-        next unless $allow->($dep);
-        next if $dep =~ /^(?:Task|Bundle)/;
+        my $dist = $dep->distribution;
 
-        push @deps => $dep;
+        next unless $allow->($dist);
+        next if $dist =~ /^(?:Task|Bundle)/;
+
+        push @deps => $dist;
     }
 
     return @deps;
