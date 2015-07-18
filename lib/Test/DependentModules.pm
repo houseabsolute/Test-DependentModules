@@ -4,6 +4,8 @@ use strict;
 use warnings;
 use autodie;
 
+our $VERSION = '0.21';
+
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
 BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
