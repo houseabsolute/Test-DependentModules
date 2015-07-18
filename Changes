@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- If PERL_TEST_DM_CPAN_VERBOSE was true and Test::More had not been loaded in
+  the process you would get an error. GH #9.
+
+
 0.20   2014-08-31
 
 - The use of MetaCPAN::Client was a bit broken. Patch by Sawyer X. PR #8.

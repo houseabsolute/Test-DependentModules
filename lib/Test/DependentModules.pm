@@ -504,7 +504,7 @@ sub _run_tests {
         $CPAN::Config->{mbuild_install_arg} =~ s /--uninst\s+1//;
 
         if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
-            $fh = io_from_write_cb( sub { Test::More::diag( $_[0] ) } );
+            $fh = io_from_write_cb( sub { $Test->diag( $_[0] ) } );
         }
 
         $LOADED_CPAN = 1;
