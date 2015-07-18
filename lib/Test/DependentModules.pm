@@ -8,7 +8,10 @@ our $VERSION = '0.21';
 
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
-BEGIN { $INC{'CPAN/Reporter.pm'} = 0 }
+BEGIN {
+    ## no critic (Variables::RequireLocalizedPunctuationVars)
+    $INC{'CPAN/Reporter.pm'} = 0;
+}
 
 use Capture::Tiny qw( capture );
 use Cwd qw( abs_path );
@@ -26,10 +29,12 @@ use Try::Tiny;
 
 our @EXPORT_OK = qw( test_all_dependents test_module test_modules );
 
+## no critic (Variables::RequireLocalizedPunctuationVars)
 $ENV{PERL5LIB} = join q{:}, ( $ENV{PERL5LIB} || q{} ),
     File::Spec->catdir( _temp_lib_dir(), 'lib', 'perl5' );
 $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
 $ENV{PERL_MM_USE_DEFAULT} = 1;
+## use critic
 
 my $Test = Test::Builder->new();
 
@@ -59,7 +64,7 @@ sub _get_deps {
     my $allow
         = $params->{exclude}
         ? sub { $_[0] !~ /$params->{exclude}/ }
-        : sub { 1 };
+        : sub {1};
 
     my @deps;
     while ( my $dep = $rev_deps->next ) {
@@ -82,13 +87,12 @@ sub test_modules {
     if (   $ENV{PERL_TEST_DM_PROCESSES}
         && $ENV{PERL_TEST_DM_PROCESSES} > 1 ) {
 
-        eval { require Parallel::ForkManager };
-        if ($@) {
-            warn
-                'Cannot run multiple processes without the Parallel::ForkManager module.';
+        if ( eval { require Parallel::ForkManager; 1; } ) {
+            $parallel = 1;
         }
         else {
-            $parallel = 1;
+            warn
+                'Cannot run multiple processes without the Parallel::ForkManager module.';
         }
     }
 
@@ -155,8 +159,7 @@ sub test_module {
         my $output  = "Could not find $name on CPAN\n";
         if ($pm) {
             $pm->finish(
-                0,
-                {
+                0, {
                     name    => $name,
                     passed  => 0,
                     summary => $summary,
@@ -186,8 +189,7 @@ sub test_module {
         $msg =~ s/\n/\t/g;
         if ($pm) {
             $pm->finish(
-                0,
-                {
+                0, {
                     name    => $name,
                     skipped => $msg,
                 }
@@ -224,8 +226,7 @@ sub test_module {
 
     if ($pm) {
         $pm->finish(
-            0,
-            {
+            0, {
                 name    => $name,
                 passed  => $passed,
                 summary => $summary,
@@ -240,6 +241,7 @@ sub test_module {
     }
 }
 
+## no critic (Subroutines::ProhibitManyArgs)
 sub _test_report {
     my $name    = shift;
     my $passed  = shift;
@@ -341,9 +343,11 @@ sub _install_prereqs {
 
     my $install_dir = _temp_lib_dir();
 
+    ## no critic (Variables::RequireInitializationForLocalVars, Variables::ProhibitPackageVars)
     local $CPAN::Config->{makepl_arg} .= " INSTALL_BASE=$install_dir";
     local $CPAN::Config->{mbuild_install_arg}
         .= " --install_base $install_dir";
+    ## use critic
 
     my $for_dist = $dist->base_id();
 
@@ -401,7 +405,7 @@ sub _run_tests_for_dir {
 
     local $CWD = $dir;
 
-    if ( -f "Build.PL" ) {
+    if ( -f 'Build.PL' ) {
         return
             unless _run_commands(
             ['./Build'],
@@ -478,19 +482,22 @@ sub _run_tests {
     my $LOADED_CPAN = 0;
 
     sub _load_cpan {
+        ## no critic (TestingAndDebugging::ProhibitNoWarnings)
         no warnings 'once';
         return if $LOADED_CPAN;
 
         require CPAN;
         require CPAN::Shell;
 
+        ## no critic (InputOutput::RequireBriefOpen)
         open my $fh, '>', File::Spec->devnull();
 
         {
             no warnings 'redefine';
-            *CPAN::Shell::report_fh = sub { $fh };
+            *CPAN::Shell::report_fh = sub {$fh};
         }
 
+        ## no critic (Variables::ProhibitPackageVars)
         $CPAN::Be_Silent = 1;
 
         CPAN::HandleConfig->load();

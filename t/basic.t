@@ -19,10 +19,11 @@ for my $builder (qw( eumm mb mbt )) {
 }
 
 {
-    my ( $success, $out, $err ) = test_corpus("broken_passing");
-    ok !$success,
-        "considered failing even when output contains random Result: PASS"
-        or diag "Output:\n$out\nError:\n$err";
+    my ( $success, $out, $err ) = test_corpus('broken_passing');
+    ok(
+        !$success,
+        'considered failing even when output contains random Result: PASS'
+    ) or diag "Output:\n$out\nError:\n$err";
 }
 
 done_testing();
@@ -35,19 +36,21 @@ sub test_corpus {
 
     local $CWD = $temp_dir;
 
+    my ( $stdout, $stderr );
     run3(
         [
             $^X,
             ( -f 'Build.PL' ? 'Build.PL' : 'Makefile.PL' )
         ],
         \undef,
-        \( my $stdout ),
-        \( my $stderr )
+        \$stdout,
+        \$stderr,
     );
 
     if ( $? != 0 ) {
         die "Can't build $dist:\nOutput:\n$stdout\nError:\n$stderr\n";
     }
 
+    ## no critic (Subroutines::ProtectPrivateSubs)
     return Test::DependentModules::_run_tests_for_dir($temp_dir);
 }
