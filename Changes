@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.22   2015-08-21
+
 - The test_all_dependents() sub now lets you pass a filter subroutine instead
   of an exclude regex. This is a lot simpler to implement in many cases.
 
