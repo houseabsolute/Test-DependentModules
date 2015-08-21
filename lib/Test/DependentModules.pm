@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use autodie;
 
-our $VERSION = '0.22';
+our $VERSION = '0.23';
 
 # CPAN::Reporter spits out random output we don't want, and we don't want to
 # report these tests anyway.
