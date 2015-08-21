@@ -62,9 +62,9 @@ sub _get_deps {
     my $rev_deps = MetaCPAN::Client->new()->rev_deps($module);
 
     my $allow
-        = $params->{exclude}
-        ? sub { $_[0] !~ /$params->{exclude}/ }
-        : sub {1};
+        = $params->{filter} ? $params->{filter}
+        : $params->{exclude} ? sub { $_[0] !~ /$params->{exclude}/ }
+        :                      sub {1};
 
     my @deps;
     while ( my $dep = $rev_deps->next ) {
@@ -582,15 +582,18 @@ enable parallel testing.
 
 This module optionally exports three functions:
 
-=head2 test_all_dependents( $module, { exclude => qr/.../ } )
+=head2 test_all_dependents( $module, { filter => sub { ... } } )
 
 Given a module name, this function uses L<MetaCPAN::Client> to find all its
 dependencies and test them. It will set a test plan for you.
 
-If you want to exclude some dependencies, you can pass a regex which will be
-used to exclude any matching distributions. Note that this will be tested
-against the I<distribution name>, which will be something like "Test-DependentModules"
-(note the lack of colons).
+If you provide a C<filter> sub, it will be called with a single argument, the
+I<distribution name>, which will be something like "Test-DependentModules"
+(note the lack of colons). The filter should return a true or false value to
+indicate whether or not to test that distribution.
+
+If you don't provide a filter, you can provide a regex to use by passing an
+C<exclude> key in the hashref. Anything that matches the regex is excluded.
 
 Additionally, any distribution name starting with "Task" or "Bundle" is always
 excluded.
