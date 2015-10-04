@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- Use diag to print the name of each distribution before it is tested. This is
+  helpful if a particular distro hangs during the build or test phases.
+
+
 0.22   2015-08-21
 
 - The test_all_dependents() sub now lets you pass a filter subroutine instead
