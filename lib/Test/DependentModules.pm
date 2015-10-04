@@ -222,9 +222,7 @@ sub test_module {
     }
 
     my $summary
-        = "$status: $name - "
-        . $dist->base_id . ' - '
-        . $dist->author->id;
+        = "$status: $name - " . $dist->base_id . ' - ' . $dist->author->id;
 
     if ($pm) {
         $pm->finish(
