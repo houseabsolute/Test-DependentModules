@@ -36,7 +36,7 @@ $ENV{PERL_AUTOINSTALL}    = '--defaultdeps';
 $ENV{PERL_MM_USE_DEFAULT} = 1;
 ## use critic
 
-my $Test = Test::Builder->new();
+my $Test = Test::Builder->new;
 
 sub test_all_dependents {
     my $module = shift;
@@ -59,7 +59,7 @@ sub _get_deps {
 
     $module =~ s/::/-/g;
 
-    my $rev_deps = MetaCPAN::Client->new()->rev_deps($module);
+    my $rev_deps = MetaCPAN::Client->new->rev_deps($module);
 
     my $allow
         = $params->{filter} ? $params->{filter}
@@ -129,13 +129,13 @@ sub _test_in_parallel {
     );
 
     for my $module (@_) {
-        $pm->start() and next;
+        $pm->start and next;
 
         local $Test::Builder::Level = $Test::Builder::Level + 1;
         test_module( $module, $pm );
     }
 
-    $pm->wait_all_children();
+    $pm->wait_all_children;
 }
 
 sub test_module {
@@ -154,8 +154,8 @@ sub test_module {
     unless ($dist) {
         $name =~ s/::/-/g;
         my $todo
-            = defined( $Test->todo() )
-            ? ' (TODO: ' . $Test->todo() . ')'
+            = defined( $Test->todo )
+            ? ' (TODO: ' . $Test->todo . ')'
             : q{};
         my $summary = "FAIL${todo}: $name - ??? - ???";
         my $output  = "Could not find $name on CPAN\n";
@@ -178,7 +178,7 @@ sub test_module {
         return;
     }
 
-    $name = $dist->base_id();
+    $name = $dist->base_id;
 
     my $success = try {
         capture { _install_prereqs($dist) };
@@ -207,7 +207,7 @@ sub test_module {
 
     return unless $success;
 
-    my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir() );
+    my ( $passed, $output, $stderr ) = _run_tests_for_dir( $dist->dir );
 
     # A lot of modules seem to have cargo-culted a diag() that looks like this
     # ...
@@ -217,14 +217,14 @@ sub test_module {
         if defined $stderr && $stderr =~ /\A\# Testing [\w:]+ [^\n]+\Z/;
 
     my $status = $passed && $stderr ? 'WARN' : $passed ? 'PASS' : 'FAIL';
-    if ( my $reason = $Test->todo() ) {
+    if ( my $reason = $Test->todo ) {
         $status .= " (TODO: $reason)";
     }
 
     my $summary
         = "$status: $name - "
-        . $dist->base_id() . ' - '
-        . $dist->author()->id();
+        . $dist->base_id . ' - '
+        . $dist->author->id;
 
     if ($pm) {
         $pm->finish(
@@ -315,7 +315,7 @@ sub _test_report {
 sub _log_filename {
     my $type = shift;
 
-    return File::Spec->devnull()
+    return File::Spec->devnull
         unless $ENV{PERL_TEST_DM_LOG_DIR};
 
     return File::Spec->catfile(
@@ -331,11 +331,11 @@ sub _get_distro {
 
     return unless @mods == 1;
 
-    my $dist = $mods[0]->distribution();
+    my $dist = $mods[0]->distribution;
 
     return unless $dist;
 
-    $dist->get();
+    $dist->get;
 
     return $dist;
 }
@@ -351,20 +351,20 @@ sub _install_prereqs {
         .= " --install_base $install_dir";
     ## use critic
 
-    my $for_dist = $dist->base_id();
+    my $for_dist = $dist->base_id;
 
     for my $prereq ( $dist->unsat_prereq('configure_requires_later') ) {
         _install_prereq( $prereq->[0], $for_dist );
     }
 
-    $dist->undelay();
-    $dist->make();
+    $dist->undelay;
+    $dist->make;
 
     for my $prereq ( $dist->unsat_prereq('later') ) {
         _install_prereq( $prereq->[0], $for_dist );
     }
 
-    $dist->undelay();
+    $dist->undelay;
 }
 
 sub _install_prereq {
@@ -380,13 +380,13 @@ sub _install_prereq {
 
     _install_prereqs($dist);
 
-    my $installing = $dist->base_id();
+    my $installing = $dist->base_id;
 
     _prereq_log("Installing $installing for $for_dist\n");
 
     try {
-        $dist->notest();
-        $dist->install();
+        $dist->notest;
+        $dist->install;
     }
     catch {
         die "Installing $installing for $for_dist failed: $_";
@@ -492,7 +492,7 @@ sub _run_tests {
         require CPAN::Shell;
 
         ## no critic (InputOutput::RequireBriefOpen)
-        open my $fh, '>', File::Spec->devnull();
+        open my $fh, '>', File::Spec->devnull;
 
         {
             no warnings 'redefine';
@@ -502,7 +502,7 @@ sub _run_tests {
         ## no critic (Variables::ProhibitPackageVars)
         $CPAN::Be_Silent = 1;
 
-        CPAN::HandleConfig->load();
+        CPAN::HandleConfig->load;
         CPAN::Shell::setup_output();
         CPAN::Index->reload('force');
 
