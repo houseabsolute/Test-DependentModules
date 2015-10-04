@@ -1,5 +1,8 @@
 {{$NEXT}}
 
+- When test_all_dependents() is called, deps are now sorted before testing.
+
+
 0.23   2015-10-04
 
 - Use diag to print the name of each distribution before it is tested. This is

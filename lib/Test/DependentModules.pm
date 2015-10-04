@@ -76,7 +76,7 @@ sub _get_deps {
         push @deps => $dist;
     }
 
-    return @deps;
+    return sort { lc $a cmp lc $b } @deps;
 }
 
 sub test_modules {
