@@ -340,6 +340,7 @@ sub _get_distro {
 
 sub _install_prereqs {
     my $dist = shift;
+    my $root_dist = shift || $dist->base_id;
 
     my $install_dir = _temp_lib_dir();
 
@@ -352,35 +353,42 @@ sub _install_prereqs {
     my $for_dist = $dist->base_id;
 
     for my $prereq ( $dist->unsat_prereq('configure_requires_later') ) {
-        _install_prereq( $prereq->[0], $for_dist );
+        _install_prereq( $prereq->[0], $for_dist, $root_dist );
     }
 
     $dist->undelay;
     $dist->make;
 
     for my $prereq ( $dist->unsat_prereq('later') ) {
-        _install_prereq( $prereq->[0], $for_dist );
+        _install_prereq( $prereq->[0], $for_dist, $root_dist );
     }
 
     $dist->undelay;
 }
 
 sub _install_prereq {
-    my ( $prereq, $for_dist ) = @_;
+    my $prereq    = shift;
+    my $for_dist  = shift;
+    my $root_dist = shift;
 
     return if $prereq eq 'perl';
 
+    my $for = "for $for_dist";
+    if ( $for_dist ne $root_dist ) {
+        $for .= " (started with $root_dist)";
+    }
+
     my $dist = _get_distro($prereq);
     if ( !$dist ) {
-        _prereq_log("Couldn't find $prereq for $for_dist\n");
+        _prereq_log("Couldn't find $prereq $for\n");
         next;
     }
 
-    _install_prereqs($dist);
+    _install_prereqs( $dist, $root_dist );
 
     my $installing = $dist->base_id;
 
-    _prereq_log("Installing $installing for $for_dist\n");
+    _prereq_log("Installing $installing $for\n");
 
     try {
         $dist->notest;
