@@ -512,7 +512,7 @@ sub _run_tests {
         $CPAN::Config->{make_install_make_command} =~ s/^sudo //;
         $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
         $CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
-        $CPAN::Config->{mbuild_install_arg} =~ s /--uninst\s+1//;
+        $CPAN::Config->{mbuild_install_arg} =~ s/--uninst\s+1//;
 
         if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
             $fh = io_from_write_cb( sub { $Test->diag( $_[0] ) } );
