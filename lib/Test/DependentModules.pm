@@ -149,6 +149,8 @@ sub test_module {
 
     my $dist = _get_distro($name);
 
+    $Test->diag( 'Testing ' . $dist->base_id );
+
     unless ($dist) {
         $name =~ s/::/-/g;
         my $todo
