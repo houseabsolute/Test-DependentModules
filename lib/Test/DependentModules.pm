@@ -76,6 +76,7 @@ sub _get_deps {
         push @deps => $dist;
     }
 
+    ## no critic (Subroutines::ProhibitReturnSort)
     return sort { lc $a cmp lc $b } @deps;
 }
 
