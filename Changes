@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.23   2015-10-04
+
 - Use diag to print the name of each distribution before it is tested. This is
   helpful if a particular distro hangs during the build or test phases.
 
