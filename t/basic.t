@@ -40,7 +40,7 @@ sub test_corpus {
     run3(
         [
             $^X,
-            ( -f 'Build.PL' ? 'Build.PL' : 'Makefile.PL' )
+            ( -e 'Build.PL' ? 'Build.PL' : 'Makefile.PL' )
         ],
         \undef,
         \$stdout,

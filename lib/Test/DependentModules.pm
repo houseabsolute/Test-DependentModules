@@ -418,7 +418,7 @@ sub _run_tests_for_dir {
 
     local $CWD = $dir;
 
-    if ( -f 'Build.PL' ) {
+    if ( -e 'Build.PL' ) {
         return
             unless _run_commands(
             ['./Build'],
@@ -465,10 +465,10 @@ sub _run_tests {
     };
 
     my $cmd;
-    if ( -f 'Build' ) {
+    if ( -e 'Build' ) {
         $cmd = [qw( ./Build test )];
     }
-    elsif ( -f 'Makefile' ) {
+    elsif ( -e 'Makefile' ) {
         $cmd = [qw( make test )];
     }
     else {
