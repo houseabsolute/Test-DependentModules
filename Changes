@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- The previous release only had a partial fix for failures to resolve distro
+  names. This release fixes this more completely.
+
+
 0.25   2015-11-07
 
 - This module would die when it couldn't turn a dependent module name into a

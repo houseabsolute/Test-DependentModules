@@ -123,9 +123,7 @@ sub _test_in_parallel {
             my $results = shift;
 
             local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report(
-                @{$results}{qw( name passed summary output stderr skipped )}
-            );
+            _test_report($results);
         }
     );
 
@@ -150,7 +148,13 @@ sub test_module {
 
     my $dist = _get_distro($name);
     unless ($dist) {
-        $Test->diag(qq{Could't find a distro for $name});
+        _finish_test(
+            $pm,
+            {
+                name    => $name,
+                skipped => qq{Could't find a distro for $name},
+            }
+        );
         return;
     }
 
@@ -164,22 +168,16 @@ sub test_module {
             : q{};
         my $summary = "FAIL${todo}: $name - ??? - ???";
         my $output  = "Could not find $name on CPAN\n";
-        if ($pm) {
-            $pm->finish(
-                0, {
-                    name    => $name,
-                    passed  => 0,
-                    summary => $summary,
-                    output  => $output,
-                    stderr  => $output,
-                }
-            );
-        }
-        else {
-            local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report( $name, 0, $summary, $output, $output, undef );
-        }
 
+        _finish_test(
+            $pm, {
+                name    => $name,
+                passed  => 0,
+                summary => $summary,
+                output  => $output,
+                stderr  => $output,
+            }
+        );
         return;
     }
 
@@ -194,19 +192,14 @@ sub test_module {
         my $msg = "Installing prereqs for $name failed: $_";
         $msg =~ s/\s*$//;
         $msg =~ s/\n/\t/g;
-        if ($pm) {
-            $pm->finish(
-                0, {
-                    name    => $name,
-                    skipped => $msg,
-                }
-            );
-        }
-        else {
-            local $Test::Builder::Level = $Test::Builder::Level + 1;
-            _test_report( $name, undef, undef, undef, undef, $msg );
-        }
 
+        _finish_test(
+            $pm,
+            , {
+                name    => $name,
+                skipped => $msg,
+            }
+        );
         return;
     };
 
@@ -229,53 +222,57 @@ sub test_module {
     my $summary
         = "$status: $name - " . $dist->base_id . ' - ' . $dist->author->id;
 
+    _finish_test(
+        $pm,
+        {
+            name    => $name,
+            passed  => $passed,
+            summary => $summary,
+            output  => $output,
+            stderr  => $stderr,
+        }
+    );
+}
+
+sub _finish_test {
+    my $pm      = shift;
+    my $results = shift;
+
     if ($pm) {
-        $pm->finish(
-            0, {
-                name    => $name,
-                passed  => $passed,
-                summary => $summary,
-                output  => $output,
-                stderr  => $stderr,
-            }
-        );
+        $pm->finish( 0, $results );
     }
     else {
-        local $Test::Builder::Level = $Test::Builder::Level + 1;
-        _test_report( $name, $passed, $summary, $output, $stderr );
+        local $Test::Builder::Level = $Test::Builder::Level + 2;
+        _test_report($results);
     }
 }
 
 ## no critic (Subroutines::ProhibitManyArgs)
 sub _test_report {
-    my $name    = shift;
-    my $passed  = shift;
-    my $summary = shift;
-    my $output  = shift;
-    my $stderr  = shift;
-    my $skipped = shift;
+    my $results = shift;
 
-    if ($skipped) {
-        _status_log("UNKNOWN: $name ($skipped)\n");
-        _error_log("UNKNOWN: $name ($skipped)\n");
+    if ( $results->{skipped} ) {
+        _status_log("UNKNOWN: $results->{name} ($results->{skipped})\n");
+        _error_log("UNKNOWN: $results->{name} ($results->{skipped})\n");
 
-        $Test->diag("Skipping $name: $skipped");
-        $Test->skip($skipped);
+        $Test->diag("Skipping $results->{name}: $results->{skipped}");
+        $Test->skip( $results->{skipped} );
     }
     else {
-        _status_log("$summary\n");
-        _error_log("$summary\n");
+        _status_log("$results->{summary}\n");
+        _error_log("$results->{summary}\n");
 
-        $Test->ok( $passed, "$name passed all tests" );
+        $Test->ok( $results->{passed}, "$results->{name} passed all tests" );
     }
 
-    if ( $passed || $skipped ) {
+    if ( $results->{passed} || $results->{skipped} ) {
         _error_log("\n");
     }
     else {
         _error_log( q{-} x 50 );
         _error_log("\n");
-        _error_log("$output\n") if defined $output;
+        _error_log("$results->{output}\n") if defined $results->{output};
+        _error_log("$results->{stderr}\n") if defined $results->{stderr};
     }
 }
 
