@@ -149,6 +149,10 @@ sub test_module {
     $name =~ s/-/::/g;
 
     my $dist = _get_distro($name);
+    unless ($dist) {
+        $Test->diag(qq{Could't find a distro for $name});
+        return;
+    }
 
     $Test->diag( 'Testing ' . $dist->base_id );
 

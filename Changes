@@ -1,5 +1,9 @@
 {{$NEXT}}
 
+- This module would die when it couldn't turn a dependent module name into a
+  distro. Now it outputs a diag() message and continues on.
+
+
 0.24   2015-10-04
 
 - When test_all_dependents() is called, deps are now sorted before testing.
