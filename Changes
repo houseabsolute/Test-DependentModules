@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.26   2015-11-07
+
 - The previous release only had a partial fix for failures to resolve distro
   names. This release fixes this more completely.
 
