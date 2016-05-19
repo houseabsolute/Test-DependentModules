@@ -4,7 +4,7 @@ Test::DependentModules - Test all modules which depend on your module
 
 # VERSION
 
-version 0.20
+version 0.27
 
 # SYNOPSIS
 
@@ -58,15 +58,18 @@ enable parallel testing.
 
 This module optionally exports three functions:
 
-## test\_all\_dependents( $module, { exclude => qr/.../ } )
+## test\_all\_dependents( $module, { filter => sub { ... } } )
 
 Given a module name, this function uses [MetaCPAN::Client](https://metacpan.org/pod/MetaCPAN::Client) to find all its
 dependencies and test them. It will set a test plan for you.
 
-If you want to exclude some dependencies, you can pass a regex which will be
-used to exclude any matching distributions. Note that this will be tested
-against the _distribution name_, which will be something like "Test-DependentModules"
-(note the lack of colons).
+If you provide a `filter` sub, it will be called with a single argument, the
+_distribution name_, which will be something like "Test-DependentModules"
+(note the lack of colons). The filter should return a true or false value to
+indicate whether or not to test that distribution.
+
+If you don't provide a filter, you can provide a regex to use by passing an
+`exclude` key in the hashref. Anything that matches the regex is excluded.
 
 Additionally, any distribution name starting with "Task" or "Bundle" is always
 excluded.
@@ -119,13 +122,6 @@ directory must already exist.
 You also can enable CPAN's output by setting the
 `$ENV{PERL_TEST_DM_CPAN_VERBOSE}` variable to a true value.
 
-# BUGS
-
-Please report any bugs or feature requests to `bug-test-mydeps@rt.cpan.org`,
-or through the web interface at [http://rt.cpan.org](http://rt.cpan.org).  I will be notified,
-and then you'll automatically be notified of progress on your bug as I make
-changes.
-
 # DONATIONS
 
 If you'd like to thank me for the work I've done on this module, please
@@ -143,13 +139,49 @@ on free software full time, which seems unlikely at best.
 To donate, log into PayPal and send money to autarch@urth.org or use the
 button on this page: [http://www.urth.org/~autarch/fs-donation.html](http://www.urth.org/~autarch/fs-donation.html)
 
+# BUGS
+
+Please report any bugs or feature requests to `bug-test-mydeps@rt.cpan.org`,
+or through the web interface at [http://rt.cpan.org](http://rt.cpan.org).  I will be notified,
+and then you'll automatically be notified of progress on your bug as I make
+changes.
+
+Bugs may be submitted through [the RT bug tracker](http://rt.cpan.org/Public/Dist/Display.html?Name=Test-DependentModules)
+(or [bug-test-dependentmodules@rt.cpan.org](mailto:bug-test-dependentmodules@rt.cpan.org)).
+
+I am also usually active on IRC as 'drolsky' on `irc://irc.perl.org`.
+
+# DONATIONS
+
+If you'd like to thank me for the work I've done on this module, please
+consider making a "donation" to me via PayPal. I spend a lot of free time
+creating free software, and would appreciate any support you'd care to offer.
+
+Please note that **I am not suggesting that you must do this** in order for me
+to continue working on this particular software. I will continue to do so,
+inasmuch as I have in the past, for as long as it interests me.
+
+Similarly, a donation made in this way will probably not make me work on this
+software much more, unless I get so many donations that I can consider working
+on free software full time (let's all have a chuckle at that together).
+
+To donate, log into PayPal and send money to autarch@urth.org, or use the
+button at [http://www.urth.org/~autarch/fs-donation.html](http://www.urth.org/~autarch/fs-donation.html).
+
 # AUTHOR
 
 Dave Rolsky <autarch@urth.org>
 
-# COPYRIGHT AND LICENSE
+# CONTRIBUTORS
 
-This software is Copyright (c) 2014 by Dave Rolsky.
+- Graham Knop <haarg@haarg.org>
+- Jesse Luehrs <doy@tozt.net>
+- mickey <mickey75@gmail.com>
+- Sawyer X <xsawyerx@cpan.org>
+
+# COPYRIGHT AND LICENCE
+
+This software is Copyright (c) 2016 by Dave Rolsky.
 
 This is free software, licensed under:
 
