@@ -543,6 +543,7 @@ __END__
 =head1 SYNOPSIS
 
     use Test::DependentModules qw( test_all_dependents );
+    use Test::More;
 
     test_all_dependents('My::Module');
 
