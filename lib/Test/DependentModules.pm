@@ -341,7 +341,7 @@ sub _get_distro {
 }
 
 sub _install_prereqs {
-    my $dist = shift;
+    my $dist      = shift;
     my $root_dist = shift || $dist->base_id;
 
     my $install_dir = _temp_lib_dir();
@@ -517,10 +517,10 @@ sub _run_tests {
         $CPAN::Config->{test_report} = 0;
         $CPAN::Config->{mbuildpl_arg} .= ' --quiet';
         $CPAN::Config->{prerequisites_policy} = 'follow';
-        $CPAN::Config->{make_install_make_command} =~ s/^sudo //;
+        $CPAN::Config->{make_install_make_command}    =~ s/^sudo //;
         $CPAN::Config->{mbuild_install_build_command} =~ s/^sudo //;
-        $CPAN::Config->{make_install_arg} =~ s/UNINST=1//;
-        $CPAN::Config->{mbuild_install_arg} =~ s/--uninst\s+1//;
+        $CPAN::Config->{make_install_arg}             =~ s/UNINST=1//;
+        $CPAN::Config->{mbuild_install_arg}           =~ s/--uninst\s+1//;
 
         if ( $ENV{PERL_TEST_DM_CPAN_VERBOSE} ) {
             $fh = io_from_write_cb( sub { $Test->diag( $_[0] ) } );
