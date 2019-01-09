@@ -548,12 +548,10 @@ __END__
 
     # or ...
 
-    use Test::DependentModules qw( test_module );
+    use Test::DependentModules qw( test_modules );
     use Test::More tests => 3;
 
-    test_module('Exception::Class');
-    test_module('DateTime');
-    test_module('Log::Dispatch');
+    test_modules( 'Exception::Class', 'DateTime', 'Log::Dispatch' );
 
 =head1 DESCRIPTION
 
