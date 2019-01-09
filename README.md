@@ -14,12 +14,10 @@ version 0.27
 
     # or ...
 
-    use Test::DependentModules qw( test_module );
+    use Test::DependentModules qw( test_modules );
     use Test::More tests => 3;
 
-    test_module('Exception::Class');
-    test_module('DateTime');
-    test_module('Log::Dispatch');
+    test_modules( 'Exception::Class', 'DateTime', 'Log::Dispatch' );
 
 # DESCRIPTION
 
@@ -122,34 +120,15 @@ directory must already exist.
 You also can enable CPAN's output by setting the
 `$ENV{PERL_TEST_DM_CPAN_VERBOSE}` variable to a true value.
 
-# DONATIONS
+# SUPPORT
 
-If you'd like to thank me for the work I've done on this module, please
-consider making a "donation" to me via PayPal. I spend a lot of free time
-creating free software, and would appreciate any support you'd care to offer.
+Bugs may be submitted at [http://rt.cpan.org/Public/Dist/Display.html?Name=Test-DependentModules](http://rt.cpan.org/Public/Dist/Display.html?Name=Test-DependentModules) or via email to [bug-test-dependentmodules@rt.cpan.org](mailto:bug-test-dependentmodules@rt.cpan.org).
 
-Please note that **I am not suggesting that you must do this** in order for me
-to continue working on this particular software. I will continue to do so,
-inasmuch as I have in the past, for as long as it interests me.
+I am also usually active on IRC as 'autarch' on `irc://irc.perl.org`.
 
-Similarly, a donation made in this way will probably not make me work on this
-software much more, unless I get so many donations that I can consider working
-on free software full time, which seems unlikely at best.
+# SOURCE
 
-To donate, log into PayPal and send money to autarch@urth.org or use the
-button on this page: [http://www.urth.org/~autarch/fs-donation.html](http://www.urth.org/~autarch/fs-donation.html)
-
-# BUGS
-
-Please report any bugs or feature requests to `bug-test-mydeps@rt.cpan.org`,
-or through the web interface at [http://rt.cpan.org](http://rt.cpan.org).  I will be notified,
-and then you'll automatically be notified of progress on your bug as I make
-changes.
-
-Bugs may be submitted through [the RT bug tracker](http://rt.cpan.org/Public/Dist/Display.html?Name=Test-DependentModules)
-(or [bug-test-dependentmodules@rt.cpan.org](mailto:bug-test-dependentmodules@rt.cpan.org)).
-
-I am also usually active on IRC as 'drolsky' on `irc://irc.perl.org`.
+The source code repository for Test-DependentModules can be found at [https://github.com/houseabsolute/Test-DependentModules](https://github.com/houseabsolute/Test-DependentModules).
 
 # DONATIONS
 
@@ -177,12 +156,16 @@ Dave Rolsky <autarch@urth.org>
 - Graham Knop <haarg@haarg.org>
 - Jesse Luehrs <doy@tozt.net>
 - mickey <mickey75@gmail.com>
+- Olaf Alders <olaf@wundersolutions.com>
 - Sawyer X <xsawyerx@cpan.org>
 
-# COPYRIGHT AND LICENCE
+# COPYRIGHT AND LICENSE
 
-This software is Copyright (c) 2016 by Dave Rolsky.
+This software is Copyright (c) 2019 by Dave Rolsky.
 
 This is free software, licensed under:
 
     The Artistic License 2.0 (GPL Compatible)
+
+The full text of the license can be found in the
+`LICENSE` file included with this distribution.
