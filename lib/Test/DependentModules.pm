@@ -651,7 +651,7 @@ where C<$type> is one of "status", "error", or "prereq".
 The directory should be provided in C<$ENV{PERL_TEST_DM_LOG_DIR}>. The
 directory must already exist.
 
-You also can enable CPAN's output by setting the
+You also can enable verbose output from the L<CPAN> package by setting the
 C<$ENV{PERL_TEST_DM_CPAN_VERBOSE}> variable to a true value.
 
 =cut
