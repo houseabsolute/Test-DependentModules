@@ -560,8 +560,8 @@ __END__
 
 =head1 DESCRIPTION
 
-B<WARNING>: The tests this module does should B<never> be included as part of
-a normal CPAN install!
+B<WARNING>: The tests this module does should B<never> be run as part of a
+normal CPAN install!
 
 This module is intended as a tool for module authors who would like to easily
 test that a module release will not break dependencies. This is particularly
@@ -597,8 +597,8 @@ This module optionally exports three functions:
 
 =head2 test_all_dependents( $module, { filter => sub { ... } } )
 
-Given a module name, this function uses L<MetaCPAN::Client> to find all its
-dependencies and test them. It will set a test plan for you.
+Given a module or distro name, this function uses L<MetaCPAN::Client> to find
+all its dependencies and test them. It will set a test plan for you.
 
 If you provide a C<filter> sub, it will be called with a single argument, the
 I<distribution name>, which will be something like "Test-DependentModules"
@@ -620,8 +620,8 @@ In this case, you will have to handle your own test planning.
 
 =head2 test_module($name)
 
-B<DEPRECATED>. Use the C<test_modules()> sub instead, so you can run
-optionally run tests in parallel.
+B<DEPRECATED>. Use the C<test_modules()> sub instead, so you can optionally
+run tests in parallel.
 
 Given a module name, this function will test it. You can use this if you'd
 prefer to hard code a list of modules to test.
