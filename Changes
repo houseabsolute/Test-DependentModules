@@ -6,6 +6,10 @@
   it can be an issue when MetaCPAN is having problems (such as
   https://github.com/metacpan/metacpan-web/issues/2139).
 
+- Explicitly add JSON::PP to our prereqs. This seems to fix an issue with
+  testing on Perl 5.10.1. This module is needed by something in our dependency
+  chain but it doesn't get installed.
+
 
 0.26   2015-11-07
 
