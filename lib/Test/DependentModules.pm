@@ -46,6 +46,11 @@ sub test_all_dependents {
     _make_logs();
 
     my @deps = _get_deps( $module, $params );
+    unless (@deps) {
+        $Test->plan(
+            skip_all => "Could not find any distros that depend on $module" );
+        return 0;
+    }
 
     $Test->plan( tests => scalar @deps );
 
