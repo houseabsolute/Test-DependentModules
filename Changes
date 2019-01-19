@@ -1,5 +1,7 @@
 {{$NEXT}}
 
+0.27   2019-01-19
+
 - If test_all_dependents() cannot find anything that depends on the given
   module it runs `plan( skip_all => ... )` rather than `plan(0)`. The latter
   causes the test to fail. While this should never really happen in normal use

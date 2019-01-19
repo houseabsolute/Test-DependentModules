@@ -9,6 +9,7 @@ requires "File::Temp" => "0";
 requires "File::chdir" => "0";
 requires "IO::Handle::Util" => "0";
 requires "IPC::Run3" => "0";
+requires "JSON::PP" => "0";
 requires "Log::Dispatch" => "0";
 requires "MetaCPAN::Client" => "0";
 requires "Test::Builder" => "0";

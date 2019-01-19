@@ -21,8 +21,8 @@ version 0.27
 
 # DESCRIPTION
 
-**WARNING**: The tests this module does should **never** be included as part of
-a normal CPAN install!
+**WARNING**: The tests this module does should **never** be run as part of a
+normal CPAN install!
 
 This module is intended as a tool for module authors who would like to easily
 test that a module release will not break dependencies. This is particularly
@@ -58,8 +58,8 @@ This module optionally exports three functions:
 
 ## test\_all\_dependents( $module, { filter => sub { ... } } )
 
-Given a module name, this function uses [MetaCPAN::Client](https://metacpan.org/pod/MetaCPAN::Client) to find all its
-dependencies and test them. It will set a test plan for you.
+Given a module or distro name, this function uses [MetaCPAN::Client](https://metacpan.org/pod/MetaCPAN::Client) to find
+all its dependencies and test them. It will set a test plan for you.
 
 If you provide a `filter` sub, it will be called with a single argument, the
 _distribution name_, which will be something like "Test-DependentModules"
@@ -81,8 +81,8 @@ In this case, you will have to handle your own test planning.
 
 ## test\_module($name)
 
-**DEPRECATED**. Use the `test_modules()` sub instead, so you can run
-optionally run tests in parallel.
+**DEPRECATED**. Use the `test_modules()` sub instead, so you can optionally
+run tests in parallel.
 
 Given a module name, this function will test it. You can use this if you'd
 prefer to hard code a list of modules to test.
@@ -117,7 +117,7 @@ where `$type` is one of "status", "error", or "prereq".
 The directory should be provided in `$ENV{PERL_TEST_DM_LOG_DIR}`. The
 directory must already exist.
 
-You also can enable CPAN's output by setting the
+You also can enable verbose output from the [CPAN](https://metacpan.org/pod/CPAN) package by setting the
 `$ENV{PERL_TEST_DM_CPAN_VERBOSE}` variable to a true value.
 
 # SUPPORT
