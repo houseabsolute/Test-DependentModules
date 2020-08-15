@@ -67,7 +67,7 @@ sub _get_deps {
     my $rev_deps = MetaCPAN::Client->new->rev_deps($module);
 
     my $allow
-        = $params->{filter} ? $params->{filter}
+        = $params->{filter}  ? $params->{filter}
         : $params->{exclude} ? sub { $_[0] !~ /$params->{exclude}/ }
         :                      sub {1};
 
@@ -200,7 +200,7 @@ sub test_module {
 
         _finish_test(
             $pm,
-            , {
+            {
                 name    => $name,
                 skipped => $msg,
             }
