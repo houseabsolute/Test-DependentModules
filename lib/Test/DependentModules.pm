@@ -637,14 +637,14 @@ that will happen automatically.
 
 =head1 WARNINGS, LOGGING AND VERBOSITY
 
-By default, this module attempts to quiet down CPAN and the module building
+By default, this module attempts to quiet down CPAN.pm and the module building
 toolchain as much as possible. However, when there are test failures in a
 dependency it's nice to see the output.
 
 In addition, if the tests spit out warnings but still pass, this will just be
 treated as a pass.
 
-If you enable logging, this module log all successes, warnings, and failures,
+If you enable logging, this module logs all successes, warnings, and failures,
 along with the full output of the test suite for each dependency. In addition,
 it logs what prereqs it installs, since you may want to install some of them
 permanently to speed up future tests.
